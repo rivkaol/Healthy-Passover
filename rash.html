@@ -81,6 +81,10 @@
         .text-break-period {
             white-space: pre-line;
         }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
         html, body {
             max-width: 100%;
             overflow-x: hidden;
@@ -112,13 +116,23 @@
         const App = () => {
             const purchaseUrl = "https://bit.ly/4slt7in";
             const [showFloatingBtn, setShowFloatingBtn] = useState(false);
-            const [activeRecipeImg, setActiveRecipeImg] = useState('2.jpg');
+            const [selectedRecipe, setSelectedRecipe] = useState(null);
 
             useEffect(() => {
-                const handleScroll = () => setShowFloatingBtn(window.scrollY > 800);
+                const handleScroll = () => {
+                    // Update floating button visibility
+                    if (window.scrollY > 800) setShowFloatingBtn(true);
+                    else setShowFloatingBtn(false);
+
+                    // Close recipe card if user continues scrolling
+                    if (selectedRecipe) {
+                        setSelectedRecipe(null);
+                    }
+                };
+
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
+            }, [selectedRecipe]);
 
             const formatText = (str) => {
                 if (!str) return "";
@@ -140,7 +154,7 @@
                 { name: "לחם שקדים – הלחם של כל בוקר", img: "b.jpg" },
                 { name: "לחם לטוסטים – כי מגיע לך טוסט", img: "c.jpg" },
                 { name: "בייגלס – רכים, ממכרים, וכיף להגיש", img: "d.jpg" },
-                { name: "פיצה לפסח – אמיתית ויוצאת", img: "e.jpg" },
+                { name: "פיצה לפסח – יוצאת אמיתית", img: "e.jpg" },
                 { name: "בראוניז – שוקולדיים ועשירים", img: "f.jpg" },
                 { name: "חיתוכיות פקאן", img: "g.jpg" },
                 { name: "חיתוכיות שוקולד אגוזים", img: "h.jpg" },
@@ -151,7 +165,7 @@
             ];
 
             return (
-                <div dir="rtl" className="min-h-screen bg-[#F8F9FA] text-[#333] overflow-x-hidden">
+                <div dir="rtl" className="min-h-screen bg-[#F8F9FA] text-[#333] overflow-x-hidden relative">
                     
                     {/* Floating CTA */}
                     {showFloatingBtn && (
@@ -160,6 +174,21 @@
                                 <span>אני רוצה פסח כזה – אני מצטרפת!</span>
                                 <ArrowLeft size={20} />
                             </a>
+                        </div>
+                    )}
+
+                    {/* Modal for Recipe Cards - Closes on scroll via useEffect */}
+                    {selectedRecipe && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 modal-overlay" onClick={() => setSelectedRecipe(null)}>
+                            <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl max-w-lg w-full relative animate-float border-b-8 border-[#B07D62]" onClick={e => e.stopPropagation()}>
+                                <div className="aspect-[1200/1260] w-full bg-gray-100 overflow-hidden">
+                                    <img src={selectedRecipe.img} alt={selectedRecipe.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="p-8 text-center bg-white">
+                                    <h3 className="text-2xl font-bold text-[#1B4D3E] mb-2">{selectedRecipe.name}</h3>
+                                    <p className="text-sm text-gray-400">גללי כדי לחזור לעמוד</p>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -198,9 +227,9 @@
                                 </div>
 
                                 <div className="pt-10">
-                                    <a href={purchaseUrl} className="btn-gold px-10 md:px-14 py-4 md:py-6 rounded-full font-bold text-lg md:text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex max-w-[90%] mx-auto">
-                                        <span>אני רוצה פסח כזה</span>
-                                        <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform" />
+                                    <a href={purchaseUrl} className="btn-gold px-10 md:px-14 py-4 md:py-6 rounded-full font-bold text-lg md:text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex max-w-[95%] mx-auto overflow-hidden">
+                                        <span className="truncate">אני רוצה פסח כזה</span>
+                                        <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform shrink-0" />
                                     </a>
                                 </div>
                             </div>
@@ -259,7 +288,9 @@
                                         <Heart size={24} className="fill-[#B07D62]" />
                                         <span>היי, אני רבקה הולצברג</span>
                                     </div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-8 text-center lg:text-right">יש פתרון. בניתי אותו בדיוק בשבילך.</h2>
+                                    <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-8 text-center lg:text-right text-break-period">
+                                        יש פתרון. בניתי אותו בדיוק בשבילך.
+                                    </h2>
                                     
                                     <div className="space-y-6 text-xl text-gray-700 leading-relaxed font-light mb-10 text-right">
                                         <p>{formatText("בניתי את הקורס הזה כי חיפשתי אותו עבור עצמי – ולא מצאתי. רציתי מתכונים שהם גם ללא גלוטן וסוכר, גם ללא קמח תפוחי אדמה, וגם פשוטים להכנה.")}</p>
@@ -291,26 +322,27 @@
                                 <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white leading-tight">
                                     <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0">12 מתכונים</span> שפשוט... עובדים.
                                 </h2>
-                                <p className="text-xl text-green-100/80 font-light italic">לחצי על שם המתכון כדי לראות איך הוא נראה</p>
+                                <p className="text-xl text-green-100/80 font-light italic">לחצי על שם המתכון כדי לראות אותו</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20 text-right">
                                 {recipes.map((recipe, idx) => (
                                     <button 
                                         key={idx} 
-                                        onClick={() => setActiveRecipeImg(recipe.img)}
-                                        className={`p-5 rounded-2xl border transition group flex items-center gap-4 text-right w-full ${activeRecipeImg === recipe.img ? 'bg-white text-[#1B4D3E] border-white shadow-xl scale-[1.02]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                        onClick={() => setSelectedRecipe(recipe)}
+                                        className="p-5 rounded-2xl border transition group flex items-center gap-4 text-right w-full bg-white/5 border-white/10 hover:bg-white hover:text-[#1B4D3E] hover:scale-[1.02] shadow-sm active:scale-95"
                                     >
-                                        <Check size={20} className={activeRecipeImg === recipe.img ? 'text-[#B07D62]' : 'text-[#D4AF37]'} />
+                                        <Check size={20} className="text-[#D4AF37] group-hover:text-[#B07D62] shrink-0" />
                                         <p className="font-medium text-lg">{recipe.name}</p>
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="max-w-[600px] mx-auto text-center">
-                                <div className="glass-card bg-white rounded-[40px] overflow-hidden p-6 md:p-8 shadow-3xl border-b-8 border-[#B07D62] mb-8">
-                                    <div className="aspect-[1200/1260] w-full bg-gray-100 rounded-[35px] overflow-hidden relative shadow-inner border-2 border-gray-50 transition-all duration-500">
-                                        <img src={activeRecipeImg} alt="תמונת מתכון" className="w-full h-full object-cover transition-opacity duration-300" key={activeRecipeImg} />
+                            {/* Center Preview Image */}
+                            <div className="max-w-[600px] mx-auto text-center px-4">
+                                <div className="glass-card bg-white rounded-[40px] overflow-hidden p-6 md:p-8 shadow-3xl border-b-8 border-[#B07D62] mb-6">
+                                    <div className="aspect-[1200/1260] w-full bg-gray-100 rounded-[35px] overflow-hidden relative shadow-inner border-2 border-gray-50">
+                                        <img src="2.jpg" alt="כל המתכונים" className="w-full h-full object-cover" />
                                     </div>
                                 </div>
                                 <p className="text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
@@ -350,7 +382,7 @@
                         </div>
                     </section>
 
-                    {/* Testimonials - IMAGE ONLY GRID */}
+                    {/* Testimonials */}
                     <section className="py-24 bg-gray-50">
                         <div className="max-w-6xl mx-auto px-4 text-center">
                             <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16">מה נשים אומרות:</h2>
