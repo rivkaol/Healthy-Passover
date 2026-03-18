@@ -153,12 +153,12 @@
                     {/* Hero Section */}
                     <header className="relative pt-12 pb-20 lg:pt-16 lg:pb-32 overflow-hidden">
                         <div className="max-w-7xl mx-auto px-4 text-center">
-                            <div className="space-y-10 z-10 max-w-4xl mx-auto">
+                            <div className="space-y-8 z-10 max-w-4xl mx-auto">
                                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-sm md:text-base font-bold shadow-sm">
                                     <Leaf size={16} className="text-[#B07D62]" />
                                     ללא גלוטן | ללא סוכר | <span className="highlight">ללא קמח תפוחי אדמה</span> | פשוט להכנה
                                 </div>
-                                <h1 className="text-4xl lg:text-7xl font-bold leading-tight text-[#1B4D3E] tracking-tight text-break-period">
+                                <h1 className="text-4xl lg:text-7xl font-bold leading-tight text-[#1B4D3E] tracking-tight">
                                     {formatText("פסח שבו את לא צריכה לבחור בין לאכול טוב לבין להרגיש טוב.")}
                                 </h1>
                                 <div className="text-xl lg:text-3xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-normal space-y-2">
@@ -166,7 +166,7 @@
                                     <p className="text-[#B07D62] font-semibold underline decoration-[#B07D62]/20 underline-offset-8">הכל מסודר, הכל מוכן – והכל בשבילך.</p>
                                 </div>
 
-                                {/* Main Hero Image with Circle Badge */}
+                                {/* Main Hero Image with Floating Circle Badge */}
                                 <div className="relative mt-12 mx-auto w-full max-w-[600px] group">
                                     <div className="relative animate-float bg-white rounded-[40px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] border-[10px] border-white overflow-hidden aspect-[1200/1260]">
                                         <img src="1.jpg" alt="קורס פסח" className="w-full h-full object-cover" />
@@ -228,12 +228,12 @@
                         </div>
                     </section>
 
-                    {/* Meet Rivka - Fixed Cohesive Layout */}
+                    {/* Meet Rivka - Layout Fix */}
                     <section className="py-24 bg-[#F8F9FA] overflow-hidden">
                         <div className="max-w-6xl mx-auto px-4">
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                                 
-                                {/* Profile Image - Smaller, properly aligned */}
+                                {/* Profile Image - Corrected name and small size */}
                                 <div className="lg:col-span-4 flex justify-center order-1 lg:order-2">
                                     <div className="relative group">
                                         <div className="absolute inset-0 bg-[#B07D62] rounded-full opacity-10 blur-3xl scale-150"></div>
@@ -262,7 +262,7 @@
                                     {/* Small, text-sized Pink Button */}
                                     <div className="text-center lg:text-right">
                                         <div className="flex flex-col gap-4 items-center lg:items-start">
-                                            <p className="text-xl md:text-2xl font-medium text-[#1B4D3E] opacity-80">אז יצרתי אותם. בדקתי אותם. שכלללה אותם.</p>
+                                            <p className="text-xl md:text-2xl font-medium text-[#1B4D3E] opacity-80">אז יצרתי אותם. בדקתי אותם. שכללתי אותם.</p>
                                             <div className="px-6 py-2 bg-[#B07D62] text-white rounded-full shadow-md text-lg font-bold tracking-wide inline-block hover:scale-105 transition duration-300">
                                                 ועכשיו הם שלך.
                                             </div>
@@ -373,7 +373,7 @@
                     {/* Pricing Section */}
                     <section id="purchase" className="py-32 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4 relative z-10">
-                            <h2 className="text-5xl md:text-7xl font-bold text-[#1B4D3E] mb-10 tracking-tighter">
+                            <h2 className="text-5xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter text-center">
                                 {formatText("הזמן שלך לבחור אחרת מתחיל כאן.")}
                             </h2>
                             
@@ -402,7 +402,7 @@
                                     <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase">מחיר השקה – שבוע בלבד</p>
                                 </div>
 
-                                <a href={purchaseUrl} className="w-full btn-terracotta py-7 rounded-full font-bold text-3xl shadow-2xl flex justify-center items-center gap-4 group">
+                                <a href={purchaseUrl} className="w-full btn-terracotta py-7 rounded-full font-black text-3xl shadow-2xl flex justify-center items-center gap-4 group">
                                     <span>אני רוצה לעשות את פסח הזה אחרת</span>
                                     <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300" />
                                 </a>
