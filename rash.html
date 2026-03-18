@@ -120,11 +120,9 @@
 
             useEffect(() => {
                 const handleScroll = () => {
-                    // Update floating button visibility
                     if (window.scrollY > 800) setShowFloatingBtn(true);
                     else setShowFloatingBtn(false);
 
-                    // Close recipe card if user continues scrolling
                     if (selectedRecipe) {
                         setSelectedRecipe(null);
                     }
@@ -164,6 +162,13 @@
                 { name: "פאי תפוחים מפנק", img: "l.jpg" }
             ];
 
+            const testimonials = [
+                { img: "a1.jpg", size: "large" },
+                { img: "a2.jpg", size: "large" },
+                { img: "a3.jpg", size: "small" },
+                { img: "a4.jpg", size: "small" }
+            ];
+
             return (
                 <div dir="rtl" className="min-h-screen bg-[#F8F9FA] text-[#333] overflow-x-hidden relative">
                     
@@ -177,7 +182,7 @@
                         </div>
                     )}
 
-                    {/* Modal for Recipe Cards - Closes on scroll via useEffect */}
+                    {/* Modal for Recipe Cards */}
                     {selectedRecipe && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 modal-overlay" onClick={() => setSelectedRecipe(null)}>
                             <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl max-w-lg w-full relative animate-float border-b-8 border-[#B07D62]" onClick={e => e.stopPropagation()}>
@@ -196,11 +201,11 @@
                     <header className="relative pt-12 pb-20 lg:pt-16 lg:pb-32 overflow-hidden">
                         <div className="max-w-7xl mx-auto px-4 text-center">
                             <div className="space-y-8 z-10 max-w-4xl mx-auto">
-                                <div className="inline-flex flex-wrap justify-center items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-sm md:text-base font-bold shadow-sm">
+                                <div className="inline-flex flex-wrap justify-center items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-xs md:text-base font-bold shadow-sm">
                                     <Leaf size={16} className="text-[#B07D62]" />
                                     <span>ללא גלוטן | ללא סוכר | ללא קטניות</span>
                                     <span className="hidden md:inline">|</span>
-                                    <span className="highlight">ללא קמח תפוחי אדמה</span>
+                                    <span className="highlight px-2 py-0.5">ללא קמח תפוחי אדמה</span>
                                     <span className="hidden md:inline">|</span>
                                     <span>פשוט להכנה</span>
                                 </div>
@@ -227,8 +232,8 @@
                                 </div>
 
                                 <div className="pt-10">
-                                    <a href={purchaseUrl} className="btn-gold px-10 md:px-14 py-4 md:py-6 rounded-full font-bold text-lg md:text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex max-w-[95%] mx-auto overflow-hidden">
-                                        <span className="truncate">אני רוצה פסח כזה</span>
+                                    <a href={purchaseUrl} className="btn-gold px-8 md:px-14 py-4 md:py-6 rounded-full font-bold text-lg md:text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex max-w-full">
+                                        <span>אני רוצה פסח כזה</span>
                                         <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform shrink-0" />
                                     </a>
                                 </div>
@@ -320,7 +325,7 @@
                         <div className="max-w-6xl mx-auto px-4">
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white leading-tight">
-                                    <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0">12 מתכונים</span> שפשוט... עובדים.
+                                    <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0 font-bold">12 מתכונים</span> שפשוט... עובדים.
                                 </h2>
                                 <p className="text-xl text-green-100/80 font-light italic">לחצי על שם המתכון כדי לראות אותו</p>
                             </div>
@@ -338,7 +343,7 @@
                                 ))}
                             </div>
 
-                            {/* Center Preview Image */}
+                            {/* Center Preview Image Area */}
                             <div className="max-w-[600px] mx-auto text-center px-4">
                                 <div className="glass-card bg-white rounded-[40px] overflow-hidden p-6 md:p-8 shadow-3xl border-b-8 border-[#B07D62] mb-6">
                                     <div className="aspect-[1200/1260] w-full bg-gray-100 rounded-[35px] overflow-hidden relative shadow-inner border-2 border-gray-50">
@@ -382,15 +387,15 @@
                         </div>
                     </section>
 
-                    {/* Testimonials */}
-                    <section className="py-24 bg-gray-50">
+                    {/* Testimonials - UPDATED GRID FOR 4 IMAGES */}
+                    <section className="py-24 bg-gray-50 overflow-hidden">
                         <div className="max-w-6xl mx-auto px-4 text-center">
-                            <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16">מה נשים אומרות:</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group">
-                                        <div className="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden relative">
-                                            <img src={`a${i}.jpg`} alt={`עדות ${i}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                            <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16 italic">מה נשים אומרות:</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+                                {testimonials.map((t, i) => (
+                                    <div key={i} className={`bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group transition-transform hover:-translate-y-1 ${t.size === 'small' ? 'scale-95 opacity-90' : 'scale-100'}`}>
+                                        <div className="aspect-square bg-gray-200 rounded-2xl overflow-hidden relative">
+                                            <img src={t.img} alt={`עדות ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                                         </div>
                                     </div>
                                 ))}
@@ -401,11 +406,11 @@
                     {/* Final Pricing Section */}
                     <section id="purchase" className="py-24 md:py-32 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4 relative z-10">
-                            <h2 className="text-4xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter text-center">
+                            <h2 className="text-4xl md:text-7xl font-bold text-[#1B4D3E] mb-10 tracking-tighter text-center">
                                 {formatText("הזמן שלך לבחור אחרת מתחיל כאן.")}
                             </h2>
                             
-                            <div className="bg-[#F8F9FA] rounded-[50px] p-8 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
+                            <div className="bg-[#F8F9FA] rounded-[50px] p-6 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
                                 <div className="gold-badge-shine text-white px-8 py-3 rounded-full font-bold shadow-lg mb-10 inline-block italic tracking-widest uppercase text-sm md:text-base">קורס פסח של חירות</div>
                                 
                                 <div className="space-y-4 mb-10 text-right max-w-sm mx-auto">
@@ -430,9 +435,9 @@
                                     <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase tracking-wide">מחיר השקה – שבוע בלבד</p>
                                 </div>
 
-                                <a href={purchaseUrl} className="w-full btn-terracotta py-5 md:py-7 rounded-full font-bold text-xl md:text-3xl shadow-2xl flex justify-center items-center gap-4 group">
+                                <a href={purchaseUrl} className="w-full btn-terracotta py-5 md:py-6 rounded-full font-bold text-lg md:text-2xl shadow-2xl flex justify-center items-center gap-4 group">
                                     <span className="whitespace-normal leading-tight px-4">אני רוצה לעשות את פסח הזה אחרת</span>
-                                    <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300 shrink-0 hidden md:block" />
+                                    <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300 hidden md:block" />
                                 </a>
                             </div>
 
