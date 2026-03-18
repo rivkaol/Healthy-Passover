@@ -163,10 +163,10 @@
             ];
 
             const testimonials = [
-                { img: "a1.jpg", size: "large" },
-                { img: "a2.jpg", size: "large" },
-                { img: "a3.jpg", size: "small" },
-                { img: "a4.jpg", size: "small" }
+                { img: "a1.jpg", size: "square" },
+                { img: "a2.jpg", size: "square" },
+                { img: "a3.jpg", size: "wide" },
+                { img: "a4.jpg", size: "wide" }
             ];
 
             return (
@@ -271,7 +271,7 @@
                                     {formatText("ומתוקים? ויתרת מראש. כי לא מצאת קינוח שהוא גם בלי סוכר, גם טעים באמת, וגם לא גורם לך להרגיש רע אחרי.")}
                                 </p>
                                 <p className="text-4xl font-bold text-[#B07D62] text-center mt-8 tracking-tighter">
-                                    את לא צריכה להמשיך ככה.
+                                    את לא צריכה להמשיכה ככה.
                                 </p>
                             </div>
                         </div>
@@ -387,18 +387,33 @@
                         </div>
                     </section>
 
-                    {/* Testimonials - UPDATED GRID FOR 4 IMAGES */}
+                    {/* Testimonials - FIXED RATIOS FOR a1, a2 (Square) and a3, a4 (900x400) */}
                     <section className="py-24 bg-gray-50 overflow-hidden">
                         <div className="max-w-6xl mx-auto px-4 text-center">
                             <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16 italic">מה נשים אומרות:</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-                                {testimonials.map((t, i) => (
-                                    <div key={i} className={`bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group transition-transform hover:-translate-y-1 ${t.size === 'small' ? 'scale-95 opacity-90' : 'scale-100'}`}>
-                                        <div className="aspect-square bg-gray-200 rounded-2xl overflow-hidden relative">
-                                            <img src={t.img} alt={`עדות ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                            
+                            <div className="space-y-8">
+                                {/* First Row: Squares */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 px-4">
+                                    {testimonials.filter(t => t.size === 'square').map((t, i) => (
+                                        <div key={i} className="bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group">
+                                            <div className="aspect-square bg-gray-200 rounded-2xl overflow-hidden relative shadow-inner">
+                                                <img src={t.img} alt={`עדות ריבוע ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+
+                                {/* Second Row: Wide Images (900x400) */}
+                                <div className="grid grid-cols-1 gap-8 px-4 max-w-4xl mx-auto">
+                                    {testimonials.filter(t => t.size === 'wide').map((t, i) => (
+                                        <div key={i} className="bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group">
+                                            <div className="aspect-[900/400] bg-gray-200 rounded-2xl overflow-hidden relative shadow-inner">
+                                                <img src={t.img} alt={`עדות רחבה ${i+1}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -406,11 +421,11 @@
                     {/* Final Pricing Section */}
                     <section id="purchase" className="py-24 md:py-32 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4 relative z-10">
-                            <h2 className="text-4xl md:text-7xl font-bold text-[#1B4D3E] mb-10 tracking-tighter text-center">
+                            <h2 className="text-4xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter text-center">
                                 {formatText("הזמן שלך לבחור אחרת מתחיל כאן.")}
                             </h2>
                             
-                            <div className="bg-[#F8F9FA] rounded-[50px] p-6 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
+                            <div className="bg-[#F8F9FA] rounded-[50px] p-8 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
                                 <div className="gold-badge-shine text-white px-8 py-3 rounded-full font-bold shadow-lg mb-10 inline-block italic tracking-widest uppercase text-sm md:text-base">קורס פסח של חירות</div>
                                 
                                 <div className="space-y-4 mb-10 text-right max-w-sm mx-auto">
@@ -435,7 +450,7 @@
                                     <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase tracking-wide">מחיר השקה – שבוע בלבד</p>
                                 </div>
 
-                                <a href={purchaseUrl} className="w-full btn-terracotta py-5 md:py-6 rounded-full font-bold text-lg md:text-2xl shadow-2xl flex justify-center items-center gap-4 group">
+                                <a href={purchaseUrl} className="w-full btn-terracotta py-5 md:py-7 rounded-full font-bold text-xl md:text-2xl shadow-2xl flex justify-center items-center gap-4 group">
                                     <span className="whitespace-normal leading-tight px-4">אני רוצה לעשות את פסח הזה אחרת</span>
                                     <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300 hidden md:block" />
                                 </a>
