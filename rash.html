@@ -111,8 +111,8 @@
 
         const App = () => {
             const purchaseUrl = "https://bit.ly/4slt7in";
-            const colors = { primary: '#1B4D3E', accent: '#D4AF37', terracotta: '#B07D62' };
             const [showFloatingBtn, setShowFloatingBtn] = useState(false);
+            const [activeRecipeImg, setActiveRecipeImg] = useState('2.jpg');
 
             useEffect(() => {
                 const handleScroll = () => setShowFloatingBtn(window.scrollY > 800);
@@ -135,6 +135,21 @@
                 });
             };
 
+            const recipes = [
+                { name: "קרקרים – לנשנוש ולהגשה", img: "a.jpg" },
+                { name: "לחם שקדים – הלחם של כל בוקר", img: "b.jpg" },
+                { name: "לחם לטוסטים – כי מגיע לך טוסט", img: "c.jpg" },
+                { name: "בייגלס – רכים, ממכרים, וכיף להגיש", img: "d.jpg" },
+                { name: "פיצה לפסח – אמיתית ויוצאת", img: "e.jpg" },
+                { name: "בראוניז – שוקולדיים ועשירים", img: "f.jpg" },
+                { name: "חיתוכיות פקאן", img: "g.jpg" },
+                { name: "חיתוכיות שוקולד אגוזים", img: "h.jpg" },
+                { name: "עוגיות שוקולד צ'יפס", img: "i.jpg" },
+                { name: "כדורי קפוצ'ינו בציפוי שוקולד", img: "j.jpg" },
+                { name: "עוגת מוס שוקולד", img: "k.jpg" },
+                { name: "פאי תפוחים מפנק", img: "l.jpg" }
+            ];
+
             return (
                 <div dir="rtl" className="min-h-screen bg-[#F8F9FA] text-[#333] overflow-x-hidden">
                     
@@ -152,9 +167,13 @@
                     <header className="relative pt-12 pb-20 lg:pt-16 lg:pb-32 overflow-hidden">
                         <div className="max-w-7xl mx-auto px-4 text-center">
                             <div className="space-y-8 z-10 max-w-4xl mx-auto">
-                                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-sm md:text-base font-bold shadow-sm">
+                                <div className="inline-flex flex-wrap justify-center items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-sm md:text-base font-bold shadow-sm">
                                     <Leaf size={16} className="text-[#B07D62]" />
-                                    ללא גלוטן | ללא סוכר | <span className="highlight">ללא קמח תפוחי אדמה</span> | פשוט להכנה
+                                    <span>ללא גלוטן | ללא סוכר | ללא קטניות</span>
+                                    <span className="hidden md:inline">|</span>
+                                    <span className="highlight">ללא קמח תפוחי אדמה</span>
+                                    <span className="hidden md:inline">|</span>
+                                    <span>פשוט להכנה</span>
                                 </div>
                                 <h1 className="text-4xl lg:text-7xl font-bold leading-tight text-[#1B4D3E] tracking-tight">
                                     {formatText("פסח שבו את לא צריכה לבחור בין לאכול טוב לבין להרגיש טוב.")}
@@ -164,24 +183,22 @@
                                     <p className="text-[#B07D62] font-semibold underline decoration-[#B07D62]/20 underline-offset-8">הכל מסודר, הכל מוכן – והכל בשבילך.</p>
                                 </div>
 
-                                {/* Main Hero Image with FLOATING CIRCLE AT BOTTOM */}
-                                <div className="relative mt-12 mx-auto w-full max-w-[600px] group">
+                                <div className="relative mt-12 mx-auto w-full max-w-[600px] group px-2 md:px-0">
                                     <div className="relative animate-float bg-white rounded-[40px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] border-[10px] border-white overflow-hidden aspect-[1200/1260]">
                                         <img src="1.jpg" alt="קורס פסח" className="w-full h-full object-cover" />
                                         
-                                        {/* Floating Badge ON Image - NOW MOVED TO BOTTOM RIGHT */}
-                                        <div className="absolute bottom-8 right-8 w-32 h-32 md:w-44 md:h-44 bg-[#D4AF37] rounded-full text-white flex flex-col items-center justify-center text-center p-4 shadow-2xl border-4 border-white/50 backdrop-blur-sm z-20 gold-badge-shine">
-                                            <span className="text-xs md:text-sm font-medium tracking-tight opacity-95 uppercase">פסח של חירות</span>
+                                        <div className="absolute bottom-6 right-6 w-28 h-28 md:w-44 md:h-44 bg-[#D4AF37] rounded-full text-white flex flex-col items-center justify-center text-center p-2 md:p-4 shadow-2xl border-4 border-white/50 backdrop-blur-sm z-20 gold-badge-shine">
+                                            <span className="text-[10px] md:text-sm font-medium tracking-tight opacity-95 uppercase">פסח של חירות</span>
                                             <div className="flex items-start gap-0.5 mt-1">
-                                                <span className="text-lg md:text-2xl font-bold mt-1.5">₪</span>
-                                                <span className="text-4xl md:text-6xl font-extrabold leading-none">147</span>
+                                                <span className="text-sm md:text-2xl font-bold mt-1.5">₪</span>
+                                                <span className="text-3xl md:text-6xl font-extrabold leading-none">147</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="pt-10">
-                                    <a href={purchaseUrl} className="btn-gold px-14 py-6 rounded-full font-bold text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex">
+                                    <a href={purchaseUrl} className="btn-gold px-10 md:px-14 py-4 md:py-6 rounded-full font-bold text-lg md:text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex max-w-[90%] mx-auto">
                                         <span>אני רוצה פסח כזה</span>
                                         <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform" />
                                     </a>
@@ -230,7 +247,6 @@
                     <section className="py-24 bg-[#F8F9FA] overflow-hidden">
                         <div className="max-w-6xl mx-auto px-4">
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                                
                                 <div className="lg:col-span-4 flex justify-center order-1 lg:order-2">
                                     <div className="relative group">
                                         <div className="absolute inset-0 bg-[#B07D62] rounded-full opacity-10 blur-3xl scale-150"></div>
@@ -241,7 +257,7 @@
                                 <div className="lg:col-span-8 relative text-right order-2 lg:order-1">
                                     <div className="flex items-center justify-center lg:justify-start gap-3 text-2xl font-bold text-[#B07D62] mb-4 tracking-widest uppercase">
                                         <Heart size={24} className="fill-[#B07D62]" />
-                                        <span>היי, אני רבקה</span>
+                                        <span>היי, אני רבקה הולצברג</span>
                                     </div>
                                     <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-8 text-center lg:text-right">יש פתרון. בניתי אותו בדיוק בשבילך.</h2>
                                     
@@ -268,48 +284,38 @@
                         </div>
                     </section>
 
-                    {/* The 12 Recipes List */}
+                    {/* Interactive 12 Recipes List */}
                     <section className="py-24 bg-[#1B4D3E] text-white">
                         <div className="max-w-6xl mx-auto px-4">
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white leading-tight">
                                     <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0">12 מתכונים</span> שפשוט... עובדים.
                                 </h2>
-                                <p className="text-xl text-green-100/80 font-light italic">כל מה שאת צריכה כדי לעבור את החג בכיף</p>
+                                <p className="text-xl text-green-100/80 font-light italic">לחצי על שם המתכון כדי לראות איך הוא נראה</p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 text-right">
-                                {[
-                                    "קרקרים – לנשנוש ולהגשה",
-                                    "לחם שקדים – הלחם של כל בוקר",
-                                    "לחם לטוסטים – כי מגיע לך טוסט",
-                                    "בייגלס – רכים, ממכרים, וכיף להגיש",
-                                    "פיצה לפסח – אמיתית ויוצאת",
-                                    "בראוניז – שוקולדיים ועשירים",
-                                    "חיתוכיות פקאן",
-                                    "חיתוכיות שוקולד אגוזים",
-                                    "עוגיות שוקולד צ'יפס",
-                                    "כדורי קפוצ'ינו בציפוי שוקולד",
-                                    "עוגת מוס שוקולד",
-                                    "פאי תפוחים מפנק"
-                                ].map((recipe, idx) => (
-                                    <div key={idx} className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex items-center gap-4 hover:bg-white/10 transition group">
-                                        <Check size={20} className="text-[#D4AF37] shrink-0 group-hover:scale-110 transition" />
-                                        <p className="font-medium text-lg">{recipe}</p>
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20 text-right">
+                                {recipes.map((recipe, idx) => (
+                                    <button 
+                                        key={idx} 
+                                        onClick={() => setActiveRecipeImg(recipe.img)}
+                                        className={`p-5 rounded-2xl border transition group flex items-center gap-4 text-right w-full ${activeRecipeImg === recipe.img ? 'bg-white text-[#1B4D3E] border-white shadow-xl scale-[1.02]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                    >
+                                        <Check size={20} className={activeRecipeImg === recipe.img ? 'text-[#B07D62]' : 'text-[#D4AF37]'} />
+                                        <p className="font-medium text-lg">{recipe.name}</p>
+                                    </button>
                                 ))}
                             </div>
 
-                            <div className="max-w-[600px] mx-auto">
-                                <div className="glass-card bg-white rounded-[40px] overflow-hidden p-6 md:p-8 shadow-3xl border-b-8 border-[#B07D62]">
-                                    <div className="aspect-[1200/1260] w-full bg-gray-100 rounded-[35px] overflow-hidden relative group shadow-inner">
-                                        <img src="2.jpg" alt="כל מתכוני הקורס" className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
-                                        <div className="absolute bottom-8 inset-x-8 text-white text-center">
-                                            <p className="text-2xl font-bold tracking-tight shadow-sm">כל הטוב הזה מחכה לך בפנים</p>
-                                        </div>
+                            <div className="max-w-[600px] mx-auto text-center">
+                                <div className="glass-card bg-white rounded-[40px] overflow-hidden p-6 md:p-8 shadow-3xl border-b-8 border-[#B07D62] mb-8">
+                                    <div className="aspect-[1200/1260] w-full bg-gray-100 rounded-[35px] overflow-hidden relative shadow-inner border-2 border-gray-50 transition-all duration-500">
+                                        <img src={activeRecipeImg} alt="תמונת מתכון" className="w-full h-full object-cover transition-opacity duration-300" key={activeRecipeImg} />
                                     </div>
                                 </div>
+                                <p className="text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
+                                    כל הטוב הזה מחכה לך בפנים
+                                </p>
                             </div>
                         </div>
                     </section>
@@ -321,15 +327,15 @@
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16 text-right">
                                 <div className="p-10 bg-gray-50 rounded-[40px] border-b-4 border-[#B07D62] relative group">
                                     <FileText size={48} className="text-[#B07D62] mb-6" />
-                                    <h4 className="text-2xl font-bold mb-4">עמוד הצטיידות מסודר</h4>
-                                    <p className="text-xl text-gray-600 font-light leading-relaxed">
+                                    <h4 className="text-2xl font-bold mb-4 text-[#1B4D3E]">עמוד הצטיידות מסודר</h4>
+                                    <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed">
                                         {formatText("לפני שמתחילים – רשימה של כל המוצרים שתצטרכי לכל הקורס, עם הסבר על כל מוצר – נכנסות לפסח מוכנות. לא מנחשות.")}
                                     </p>
                                 </div>
                                 <div className="p-10 bg-gray-50 rounded-[40px] border-b-4 border-[#B07D62] relative group">
                                     <PlayCircle size={48} className="text-[#B07D62] mb-6" />
-                                    <h4 className="text-2xl font-bold mb-4">סרטוני הדרכה קצרים</h4>
-                                    <p className="text-xl text-gray-600 font-light leading-relaxed">
+                                    <h4 className="text-2xl font-bold mb-4 text-[#1B4D3E]">סרטוני הדרכה קצרים</h4>
+                                    <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed">
                                         {formatText("לכל מתכון – סרטון של דקה וחצי עד שתיים. לא שיעור. לא הרצאה. רואים, מבינים, מכינים.")}
                                     </p>
                                 </div>
@@ -344,36 +350,31 @@
                         </div>
                     </section>
 
-                    {/* Testimonials */}
+                    {/* Testimonials - IMAGE ONLY GRID */}
                     <section className="py-24 bg-gray-50">
                         <div className="max-w-6xl mx-auto px-4 text-center">
                             <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16">מה נשים אומרות:</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {[
-                                    { q: "הלחם שקדים הפך לשגרה אצלי. הכנתי אותו כל יום.", author: "משתתפת בקורס" },
-                                    { q: "הפיצה – הילדים לא האמינו שזה לפסח. גם אני לא האמנתי שאני הכנתי.", author: "אמא מאושרת" },
-                                    { q: "פעם ראשונה שאני יוצאת מפסח בלי תחושת כובד. וגם בלי אשמה.", author: "לקוחה מרוצה" },
-                                    { q: "סוף סוף קינוח שאני אוכלת אותו בלי להרגיש רע אחרי. ואפילו ביקשו ממני את המתכון.", author: "אוהבת מתוקים" }
-                                ].map((t, i) => (
-                                    <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 italic relative text-right">
-                                        <Quote className="text-[#B07D62] opacity-10 absolute top-4 right-4 w-10 h-10" />
-                                        <p className="text-lg text-gray-700 leading-relaxed mb-4">"{t.q}"</p>
-                                        <p className="text-sm font-bold text-[#B07D62]">{t.author}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="bg-white p-2 rounded-3xl shadow-md border border-gray-100 overflow-hidden group">
+                                        <div className="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden relative">
+                                            <img src={`a${i}.jpg`} alt={`עדות ${i}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </section>
 
-                    {/* Pricing Section */}
-                    <section id="purchase" className="py-32 bg-white text-center">
+                    {/* Final Pricing Section */}
+                    <section id="purchase" className="py-24 md:py-32 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4 relative z-10">
-                            <h2 className="text-5xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter text-center">
+                            <h2 className="text-4xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter text-center">
                                 {formatText("הזמן שלך לבחור אחרת מתחיל כאן.")}
                             </h2>
                             
-                            <div className="bg-[#F8F9FA] rounded-[50px] p-12 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
-                                <div className="gold-badge-shine text-white px-10 py-3 rounded-full font-bold shadow-lg mb-10 inline-block italic tracking-widest uppercase">קורס פסח של חירות</div>
+                            <div className="bg-[#F8F9FA] rounded-[50px] p-8 md:p-20 shadow-3xl max-w-xl mx-auto border-8 border-white">
+                                <div className="gold-badge-shine text-white px-8 py-3 rounded-full font-bold shadow-lg mb-10 inline-block italic tracking-widest uppercase text-sm md:text-base">קורס פסח של חירות</div>
                                 
                                 <div className="space-y-4 mb-10 text-right max-w-sm mx-auto">
                                     <div className="flex items-center gap-3 text-lg font-medium"><Check className="text-[#B07D62]"/> <span className="highlight text-primary font-semibold">12 מתכונים</span> פשוטים ומדויקים</div>
@@ -389,21 +390,21 @@
                                 </div>
 
                                 <div className="flex flex-col items-center mb-12">
-                                    <span className="text-3xl text-gray-300 line-through decoration-[#B07D62] decoration-4 opacity-70">₪247</span>
+                                    <span className="text-2xl text-gray-300 line-through decoration-[#B07D62] decoration-4 opacity-70">₪247</span>
                                     <div className="flex items-start gap-1">
-                                        <span className="text-5xl font-bold text-[#1B4D3E] mt-4">₪</span>
-                                        <span className="text-9xl font-bold text-[#1B4D3E] leading-none">147</span>
+                                        <span className="text-4xl md:text-5xl font-bold text-[#1B4D3E] mt-4">₪</span>
+                                        <span className="text-7xl md:text-9xl font-extrabold text-[#1B4D3E] leading-none">147</span>
                                     </div>
-                                    <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase">מחיר השקה – שבוע בלבד</p>
+                                    <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase tracking-wide">מחיר השקה – שבוע בלבד</p>
                                 </div>
 
-                                <a href={purchaseUrl} className="w-full btn-terracotta py-7 rounded-full font-black text-3xl shadow-2xl flex justify-center items-center gap-4 group">
-                                    <span>אני רוצה לעשות את פסח הזה אחרת</span>
-                                    <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300" />
+                                <a href={purchaseUrl} className="w-full btn-terracotta py-5 md:py-7 rounded-full font-bold text-xl md:text-3xl shadow-2xl flex justify-center items-center gap-4 group">
+                                    <span className="whitespace-normal leading-tight px-4">אני רוצה לעשות את פסח הזה אחרת</span>
+                                    <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300 shrink-0 hidden md:block" />
                                 </a>
                             </div>
 
-                            <div className="mt-16 text-2xl text-[#1B4D3E] font-medium italic max-w-2xl mx-auto text-center px-4">
+                            <div className="mt-16 text-xl md:text-2xl text-[#1B4D3E] font-medium italic max-w-2xl mx-auto text-center px-4 leading-relaxed">
                                 {formatText("\"את לא צריכה לשרוד את פסח. את יכולה ליהנות ממנו – עם אוכל שטעים לך, שמרגיש לך טוב, ושאת מכינה בלי להסתבך.\"")}
                             </div>
                             
