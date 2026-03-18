@@ -26,6 +26,7 @@
             width: 100%;
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
@@ -64,14 +65,11 @@
             to { background-position: 200% center; }
         }
         .highlight {
-            background-color: rgba(212, 175, 55, 0.2);
-            padding: 0 6px;
+            background-color: rgba(212, 175, 55, 0.12);
+            padding: 0 4px;
             border-radius: 4px;
             font-weight: 600;
             color: #1B4D3E;
-        }
-        .text-break-period {
-            white-space: pre-line;
         }
         .fade-in-up {
             animation: fadeInUp 0.5s ease-out forwards;
@@ -80,9 +78,17 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .text-break-period {
+            white-space: pre-line;
+        }
+        /* Prevents side-to-side wobble on mobile */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
     </style>
 </head>
-<body class="bg-[#F8F9FA] text-[#333] overflow-x-hidden">
+<body class="bg-[#F8F9FA] text-[#333]">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -147,12 +153,12 @@
                     {/* Hero Section */}
                     <header className="relative pt-12 pb-20 lg:pt-16 lg:pb-32 overflow-hidden">
                         <div className="max-w-7xl mx-auto px-4 text-center">
-                            <div className="space-y-8 z-10 max-w-4xl mx-auto">
+                            <div className="space-y-10 z-10 max-w-4xl mx-auto">
                                 <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white border border-[#B07D62]/20 text-[#1B4D3E] text-sm md:text-base font-bold shadow-sm">
                                     <Leaf size={16} className="text-[#B07D62]" />
                                     ללא גלוטן | ללא סוכר | <span className="highlight">ללא קמח תפוחי אדמה</span> | פשוט להכנה
                                 </div>
-                                <h1 className="text-4xl lg:text-7xl font-extrabold leading-tight text-[#1B4D3E] tracking-tight">
+                                <h1 className="text-4xl lg:text-7xl font-bold leading-tight text-[#1B4D3E] tracking-tight text-break-period">
                                     {formatText("פסח שבו את לא צריכה לבחור בין לאכול טוב לבין להרגיש טוב.")}
                                 </h1>
                                 <div className="text-xl lg:text-3xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-normal space-y-2">
@@ -160,15 +166,15 @@
                                     <p className="text-[#B07D62] font-semibold underline decoration-[#B07D62]/20 underline-offset-8">הכל מסודר, הכל מוכן – והכל בשבילך.</p>
                                 </div>
 
-                                {/* Hero Image with Floating Price Circle */}
-                                <div className="relative mt-12 mx-auto w-full max-w-[600px]">
-                                    <div className="relative animate-float bg-white rounded-[40px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] border-[10px] border-white overflow-hidden">
+                                {/* Main Hero Image with Circle Badge */}
+                                <div className="relative mt-12 mx-auto w-full max-w-[600px] group">
+                                    <div className="relative animate-float bg-white rounded-[40px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] border-[10px] border-white overflow-hidden aspect-[1200/1260]">
                                         <img src="1.jpg" alt="קורס פסח" className="w-full h-full object-cover" />
                                         
-                                        {/* Floating Badge ON Image */}
+                                        {/* Floating Badge ON Image - Circle Price */}
                                         <div className="absolute top-6 right-6 w-32 h-32 md:w-44 md:h-44 bg-[#D4AF37] rounded-full text-white flex flex-col items-center justify-center text-center p-4 shadow-xl border-4 border-white/50 backdrop-blur-sm z-20 gold-badge-shine">
-                                            <span className="text-xs md:text-sm font-medium tracking-tight opacity-95">פסח של חירות</span>
-                                            <div className="flex items-start gap-0.5">
+                                            <span className="text-xs md:text-sm font-medium tracking-tight opacity-95 uppercase">פסח של חירות</span>
+                                            <div className="flex items-start gap-0.5 mt-1">
                                                 <span className="text-lg md:text-2xl font-bold mt-1.5">₪</span>
                                                 <span className="text-4xl md:text-6xl font-extrabold">147</span>
                                             </div>
@@ -177,7 +183,7 @@
                                 </div>
 
                                 <div className="pt-10">
-                                    <a href={purchaseUrl} className="btn-gold px-14 py-5 rounded-full font-bold text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex">
+                                    <a href={purchaseUrl} className="btn-gold px-14 py-6 rounded-full font-bold text-xl shadow-2xl flex items-center justify-center gap-4 group inline-flex">
                                         <span>אני רוצה פסח כזה</span>
                                         <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform" />
                                     </a>
@@ -194,20 +200,20 @@
                                 <p>{formatText("את כבר יודעת מה טוב לגוף שלך. את לא אוכלת סוכר סתם. את לא מתפשרת על איך שאת מרגישה.")}</p>
                                 <p>{formatText("את עבדת על עצמך – ואת רוצה לשמור על זה גם בפסח. אבל פסח הוא לא בדיוק החג הכי פשוט לזה.")}</p>
                                 
-                                <div className="p-8 bg-[#B07D62]/5 rounded-[40px] border-r-8 border-[#B07D62] mt-12 text-right">
-                                    <p className="font-bold text-[#1B4D3E] mb-6 italic underline decoration-[#B07D62]/20">כי פסח מביא איתו אתגרים שאת מכירה טוב מדי:</p>
+                                <div className="p-8 bg-[#B07D62]/5 rounded-[40px] border-r-8 border-[#B07D62] mt-12 text-right shadow-sm">
+                                    <p className="font-bold text-[#1B4D3E] mb-6 italic underline decoration-[#B07D62]/20 underline-offset-4">כי פסח מביא איתו אתגרים שאת מכירה טוב מדי:</p>
                                     <ul className="space-y-8">
                                         <li className="flex gap-6">
                                             <AlertCircle className="text-[#B07D62] shrink-0 mt-1" size={28} />
-                                            <span className="text-lg md:text-xl leading-relaxed"><span className="highlight">קמח תפוחי אדמה</span> בכל מקום. שעושה אותך כבדה, נפוחה, ולא באמת מזין.</span>
+                                            <span className="text-lg md:text-xl leading-relaxed font-normal"><span className="highlight">קמח תפוחי אדמה</span> בכל מקום. שעושה אותך כבדה, נפוחה, ולא באמת מזין.</span>
                                         </li>
                                         <li className="flex gap-6">
                                             <XCircle className="text-[#B07D62] shrink-0 mt-1" size={28} />
-                                            <span className="text-lg md:text-xl leading-relaxed">מצות? גם לא ממש אופציה. את נשארת בפסח בלי <span className="highlight">תחליף אמיתי</span> לימים שלמים.</span>
+                                            <span className="text-lg md:text-xl leading-relaxed font-normal">מצות? גם לא ממש אופציה. את נשארת בפסח בלי <span className="highlight">תחליף אמיתי</span> לימים שלמים.</span>
                                         </li>
                                         <li className="flex gap-6">
                                             <ShoppingCart className="text-[#B07D62] shrink-0 mt-1" size={28} />
-                                            <span className="text-lg md:text-xl leading-relaxed">בשגרה יש לך פתרונות. אבל בפסח? החנויות לא עוזרות. את <span className="highlight text-primary font-semibold">על עצמך לגמרי</span>.</span>
+                                            <span className="text-lg md:text-xl leading-relaxed font-normal">בשגרה יש לך פתרונות. אבל בפסח? החנויות לא עוזרות. את <span className="highlight text-primary font-medium">על עצמך לגמרי</span>.</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -215,48 +221,49 @@
                                 <p className="mt-12 text-xl md:text-2xl font-semibold text-[#1B4D3E] text-center">
                                     {formatText("ומתוקים? ויתרת מראש. כי לא מצאת קינוח שהוא גם בלי סוכר, גם טעים באמת, וגם לא גורם לך להרגיש רע אחרי.")}
                                 </p>
-                                <p className="text-4xl font-extrabold text-[#B07D62] text-center mt-8">
+                                <p className="text-4xl font-bold text-[#B07D62] text-center mt-8 tracking-tighter">
                                     את לא צריכה להמשיך ככה.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    {/* Meet Rivka - New Cohesive Layout */}
+                    {/* Meet Rivka - Fixed Cohesive Layout */}
                     <section className="py-24 bg-[#F8F9FA] overflow-hidden">
                         <div className="max-w-6xl mx-auto px-4">
-                            <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                                 
-                                {/* Cohesive Image Placement */}
-                                <div className="lg:w-1/3 w-full flex justify-center">
+                                {/* Profile Image - Smaller, properly aligned */}
+                                <div className="lg:col-span-4 flex justify-center order-1 lg:order-2">
                                     <div className="relative group">
                                         <div className="absolute inset-0 bg-[#B07D62] rounded-full opacity-10 blur-3xl scale-150"></div>
-                                        <img src="me.jpg" alt="רבקה הולצברג" className="relative w-64 h-64 lg:w-80 lg:h-80 object-cover rounded-[50px] shadow-2xl border-8 border-white transform transition-transform duration-500 group-hover:rotate-2 shrink-0" />
+                                        <img src="me.jpg" alt="רבקה הולצברג" className="relative w-56 h-56 lg:w-72 lg:h-72 object-cover rounded-[50px] shadow-2xl border-8 border-white transform transition-transform duration-500 group-hover:rotate-2 shrink-0" />
                                     </div>
                                 </div>
 
-                                <div className="lg:w-2/3 w-full relative text-right">
-                                    <div className="flex items-center gap-3 text-2xl font-bold text-[#B07D62] mb-4 tracking-widest uppercase">
+                                {/* Text Content */}
+                                <div className="lg:col-span-8 relative text-right order-2 lg:order-1">
+                                    <div className="flex items-center justify-center lg:justify-start gap-3 text-2xl font-bold text-[#B07D62] mb-4 tracking-widest uppercase">
                                         <Heart size={24} className="fill-[#B07D62]" />
                                         <span>היי, אני רבקה</span>
                                     </div>
-                                    <h2 className="text-3xl md:text-5xl font-extrabold text-[#1B4D3E] mb-8">יש פתרון. בניתי אותו בדיוק בשבילך.</h2>
+                                    <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-8 text-center lg:text-right">יש פתרון. בניתי אותו בדיוק בשבילך.</h2>
                                     
                                     <div className="space-y-6 text-xl text-gray-700 leading-relaxed font-light mb-10">
                                         <p>{formatText("בניתי את הקורס הזה כי חיפשתי אותו עבור עצמי – ולא מצאתי. רציתי מתכונים שהם גם ללא גלוטן וסוכר, גם ללא קמח תפוחי אדמה, וגם פשוטים להכנה.")}</p>
                                         <div className="bg-white p-8 rounded-3xl border-r-8 border-[#B07D62] shadow-sm relative">
                                             <Quote className="absolute -top-4 -right-4 w-12 h-12 text-[#B07D62] opacity-10" />
-                                            <p className="italic font-normal relative z-10">
+                                            <p className="italic font-normal relative z-10 leading-relaxed">
                                                 "{formatText("בלי מיקסר, בלי הפרדת ביצים, בלי הסתבכות. וגם טעימים באמת – כאלה שתרצי להכין שוב גם אחרי פסח.")}"
                                             </p>
                                         </div>
                                     </div>
 
-                                    {/* Cohesive "Now they are yours" section */}
+                                    {/* Small, text-sized Pink Button */}
                                     <div className="text-center lg:text-right">
-                                        <div className="text-2xl md:text-4xl font-extrabold text-[#1B4D3E] flex flex-col gap-4">
-                                            <span className="opacity-70 text-xl md:text-2xl">אז יצרתי אותם. בדקתי אותם. שכללתי אותם.</span>
-                                            <div className="mt-4 inline-block px-12 py-4 bg-[#1B4D3E] text-white rounded-full shadow-xl tracking-widest uppercase text-lg font-bold hover:scale-105 transition duration-300">
+                                        <div className="flex flex-col gap-4 items-center lg:items-start">
+                                            <p className="text-xl md:text-2xl font-medium text-[#1B4D3E] opacity-80">אז יצרתי אותם. בדקתי אותם. שכלללה אותם.</p>
+                                            <div className="px-6 py-2 bg-[#B07D62] text-white rounded-full shadow-md text-lg font-bold tracking-wide inline-block hover:scale-105 transition duration-300">
                                                 ועכשיו הם שלך.
                                             </div>
                                         </div>
@@ -270,7 +277,7 @@
                     <section className="py-24 bg-[#1B4D3E] text-white">
                         <div className="max-w-6xl mx-auto px-4">
                             <div className="text-center mb-16">
-                                <h2 className="text-3xl md:text-5xl font-extrabold mb-6 tracking-tight">מה שמחכה לך בפנים:</h2>
+                                <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">מה שמחכה לך בפנים:</h2>
                                 <p className="text-xl text-green-100/80 font-light italic">
                                     <span className="bg-white/20 text-white px-6 py-2 rounded-xl border border-white/30 font-bold inline-block shadow-lg">12 מתכונים</span> שפשוט... עובדים.
                                 </p>
@@ -278,7 +285,7 @@
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 text-right">
                                 {[
-                                    "קרקרים – לנשנוש, להגשה, לכל רגע",
+                                    "קרקרים – לנשנוש ולהגשה",
                                     "לחם שקדים – הלחם של כל בוקר",
                                     "לחם לטוסטים – כי מגיע לך טוסט",
                                     "בייגלס – רכים, ממכרים, וכיף להגיש",
@@ -291,8 +298,8 @@
                                     "עוגת מוס שוקולד",
                                     "פאי תפוחים מפנק"
                                 ].map((recipe, idx) => (
-                                    <div key={idx} className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex items-center gap-4 hover:bg-white/10 transition">
-                                        <Check size={20} className="text-[#D4AF37] shrink-0" />
+                                    <div key={idx} className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex items-center gap-4 hover:bg-white/10 transition group">
+                                        <Check size={20} className="text-[#D4AF37] shrink-0 group-hover:scale-110 transition" />
                                         <p className="font-medium text-lg">{recipe}</p>
                                     </div>
                                 ))}
@@ -315,7 +322,7 @@
                     {/* How It Works */}
                     <section className="py-24 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4">
-                            <h2 className="text-3xl md:text-5xl font-extrabold text-[#1B4D3E] mb-16">איך הקורס עובד?</h2>
+                            <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16">איך הקורס עובד?</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16 text-right">
                                 <div className="p-10 bg-gray-50 rounded-[40px] border-b-4 border-[#B07D62] relative group">
                                     <FileText size={48} className="text-[#B07D62] mb-6" />
@@ -345,7 +352,7 @@
                     {/* Testimonials */}
                     <section className="py-24 bg-gray-50">
                         <div className="max-w-6xl mx-auto px-4 text-center">
-                            <h2 className="text-3xl md:text-5xl font-extrabold text-[#1B4D3E] mb-16">מה נשים אומרות:</h2>
+                            <h2 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-16">מה נשים אומרות:</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {[
                                     { q: "הלחם שקדים הפך לשגרה אצלי. הכנתי אותו כל יום.", author: "משתתפת בקורס" },
@@ -366,7 +373,7 @@
                     {/* Pricing Section */}
                     <section id="purchase" className="py-32 bg-white text-center">
                         <div className="max-w-5xl mx-auto px-4 relative z-10">
-                            <h2 className="text-5xl md:text-7xl font-black text-[#1B4D3E] mb-10 tracking-tighter">
+                            <h2 className="text-5xl md:text-7xl font-bold text-[#1B4D3E] mb-10 tracking-tighter">
                                 {formatText("הזמן שלך לבחור אחרת מתחיל כאן.")}
                             </h2>
                             
@@ -390,19 +397,19 @@
                                     <span className="text-3xl text-gray-300 line-through decoration-[#B07D62] decoration-4 opacity-70">₪247</span>
                                     <div className="flex items-start gap-1">
                                         <span className="text-5xl font-bold text-[#1B4D3E] mt-4">₪</span>
-                                        <span className="text-9xl font-extrabold text-[#1B4D3E] leading-none">147</span>
+                                        <span className="text-9xl font-bold text-[#1B4D3E] leading-none">147</span>
                                     </div>
                                     <p className="mt-4 text-[#B07D62] font-bold text-lg animate-pulse uppercase">מחיר השקה – שבוע בלבד</p>
                                 </div>
 
-                                <a href={purchaseUrl} className="w-full btn-terracotta py-7 rounded-full font-black text-3xl shadow-2xl flex justify-center items-center gap-4 group">
+                                <a href={purchaseUrl} className="w-full btn-terracotta py-7 rounded-full font-bold text-3xl shadow-2xl flex justify-center items-center gap-4 group">
                                     <span>אני רוצה לעשות את פסח הזה אחרת</span>
                                     <ArrowLeft size={32} className="group-hover:-translate-x-3 transition-transform duration-300" />
                                 </a>
                             </div>
 
                             <div className="mt-16 text-2xl text-[#1B4D3E] font-medium italic max-w-2xl mx-auto text-center px-4">
-                                "{formatText("את לא צריכה לשרוד את פסח. את יכולה ליהנות ממנו – עם אוכל שטעים לך, שמרגיש לך טוב, ושאת מכינה בלי להסתבך.")}"
+                                {formatText("\"את לא צריכה לשרוד את פסח. את יכולה ליהנות ממנו – עם אוכל שטעים לך, שמרגיש לך טוב, ושאת מכינה בלי להסתבך.\"")}
                             </div>
                             
                             <div className="mt-24 text-gray-500 font-bold tracking-widest uppercase pb-10">
