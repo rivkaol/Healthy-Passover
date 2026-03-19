@@ -65,35 +65,44 @@
 
         .heart-active { fill: #ef4444; stroke: #ef4444; }
         .bookmark-active { fill: #3b82f6; stroke: #3b82f6; }
+        .done-active { fill: #10b981; stroke: #10b981; }
+
+        /* Progress Bar */
+        .progress-bar-fill {
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Checklist effect */
+        .check-item { transition: all 0.2s; cursor: pointer; }
+        .check-item.checked { opacity: 0.5; text-decoration: line-through; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
-        // --- Static Data Outside Component to prevent ReferenceErrors ---
+        // --- Data Definitions ---
         const recipesList = [
-            { id: 1, name: "קרקרים – לנשנוש ולהגשה", img: "a.jpg", time: "15 דק'", description: "קרקרים פריכים ומזינים על בסיס שקדים וזרעים.", tips: ["אפשר להוסיף זעתר או מלח גס מעל לפני האפייה.", "כדאי לרדד הכי דק שאפשר לקבלת קראנץ' מושלם.", "נשמר מצוין בצנצנת אטומה עד שבועיים."], ingredients: ["2 כוסות קמח שקדים", "1/2 כוס שומשום", "1/4 כוס גרעיני חמניה", "1 כפית מלח", "1 ביצה"] },
-            { id: 2, name: "לחם שקדים – הלחם של כל בוקר", img: "b.jpg", time: "40 דק'", description: "הלחם המפורסם שלנו. רך, משביע ונטול גלוטן לחלוטין.", tips: ["אחרי האפייה, תני לו להתקרר לגמרי לפני הפריסה.", "מתאים מאוד להקפאה כפרוסות.", "ניתן להוסיף אגוזי מלך לבלילה לשדרוג."], ingredients: ["3 כוסות קמח שקדים", "1/2 כוס זרעי פשתן טחונים", "4 ביצים", "1 כפית סודה לשתייה"] },
-            { id: 3, name: "לחם לטוסטים", img: "c.jpg", time: "35 דק'", description: "מתכון ייעודי ללחם שנפרס מושלם ועובר קלייה נהדרת.", tips: ["מעולה עם גבינה צהובה כשרה לפסח.", "חשוב להשתמש בתבנית אינגליש קייק צרה."], ingredients: ["2.5 כוסות קמח שקדים", "1/4 כוס טחינה גולמית", "3 ביצים", "1/2 כוס מים"] },
-            { id: 4, name: "בייגלס רכים וממכרים", img: "d.jpg", time: "25 דק'", description: "בייגלס אמיתיים עם חור באמצע, רכים מבפנים.", tips: ["הרטבת הידיים עוזרת לעצב את הצורה בקלות.", "פזרו קצח או שומשום בנדיבות."], ingredients: ["2 כוסות קמח שקדים", "1 כוס גבינת מוצרלה", "1 ביצה", "אבקת אפייה"] },
-            { id: 5, name: "פיצה לפסח קריספית", img: "e.jpg", time: "20 דק'", description: "בצק פיצה דק וקריספי שלא תאמיני שהוא כשר.", tips: ["חממי את התנור למקסימום לפני ההכנסה.", "אל תעמיסו יותר מדי רוטב כדי שהבצק לא ירטב."], ingredients: ["1.5 כוסות קמח שקדים", "1 ביצה", "אורגנו", "רוטב עגבניות", "גבינה"] },
-            { id: 6, name: "בראוניז שוקולדיים", img: "f.jpg", time: "30 דק'", description: "בראוניז נימוחים, שוקולדיים מאוד ומתוקים בדיוק.", tips: ["הסוד הוא לא לאפות דקה אחת יותר מדי.", "ניתן להוסיף שברי אגוזים מעל."], ingredients: ["200 גרם שוקולד מריר", "1/2 כוס שמן קוקוס", "3 ביצים", "1 כוס קמח שקדים"] },
-            { id: 7, name: "חיתוכיות פקאן", img: "g.jpg", time: "25 דק'", description: "ריבועי אנרגיה עשירים בפקאן ודבש.", tips: ["לחתוך לריבועים קטנים - זה מאוד עשיר.", "מעולה לצד תה צמחים."], ingredients: ["2 כוסות פקאנים", "1/2 כוס קמח שקדים", "1/4 כוס סילאן"] },
-            { id: 8, name: "חיתוכיות שוקולד אגוזים", img: "h.jpg", time: "20 דק'", description: "קינוח ללא אפייה המשלב אגוזים ושוקולד.", tips: ["לשמור תמיד במקפיא ולהוציא רגע לפני ההגשה.", "שילוב של מלח גס מעל משדרג פלאים."], ingredients: ["שוקולד מריר", "אגוזי מלך", "חמאת שקדים"] },
-            { id: 9, name: "עוגיות שוקולד צ'יפס", img: "i.jpg", time: "12 דק'", description: "העוגיות הקלאסיות בגרסה הבריאה שלנו.", tips: ["הן מתקשות רק אחרי שהן מתקררות.", "שמרו על רווחים בתבנית."], ingredients: ["2 כוסות קמח שקדים", "1/2 כוס נטיפי שוקולד", "1/4 כוס שמן קוקוס"] },
-            { id: 10, name: "כדורי קפוצ'ינו", img: "j.jpg", time: "15 דק'", description: "כדורי אנרגיה בטעם קפה מצופים שוקולד.", tips: ["לאוהבי הקפה בלבד!", "ניתן לצפות בקוקוס טחון במקום שוקולד."], ingredients: ["תמרים", "קמח שקדים", "אבקת קפה נמס"] },
-            { id: 11, name: "עוגת מוס שוקולד", img: "k.jpg", time: "45 דק'", description: "עוגה מרשימה לאירוח. בסיס שוקולדי ומוס עשיר.", tips: ["דורש קירור של לפחות 6 שעות.", "קשטו בתותים טריים למעלה."], ingredients: ["ביצים", "שוקולד מריר", "קרם קוקוס", "קמח שקדים"] },
-            { id: 12, name: "פאי תפוחים מפנק", img: "l.jpg", time: "50 דק'", description: "בצק פריך במילוי תפוחים מקורמלים.", tips: ["לבחור תפוחים חמוצים (גראני סמית).", "להגיש חם."], ingredients: ["תפוחים ירוקים", "קינמון", "קמח שקדים", "ביצה"] }
+            { id: 1, name: "קרקרים – לנשנוש ולהגשה", img: "a.jpg", time: "15 דק'", category: "נשנושים", description: "קרקרים פריכים ומזינים על בסיס שקדים וזרעים.", tips: ["אפשר להוסיף זעתר או מלח גס מעל לפני האפייה.", "כדאי לרדד הכי דק שאפשר לקבלת קראנץ' מושלם."], ingredients: ["2 כוסות קמח שקדים", "1/2 כוס שומשום", "1/4 כוס גרעיני חמניה", "1 כפית מלח", "1 ביצה"] },
+            { id: 2, name: "לחם שקדים – הלחם של כל בוקר", img: "b.jpg", time: "40 דק'", category: "לחמים", description: "הלחם המפורסם שלנו. רך, משביע ונטול גלוטן לחלוטין.", tips: ["אחרי האפייה, תני לו להתקרר לגמרי לפני הפריסה.", "מתאים מאוד להקפאה כפרוסות."], ingredients: ["3 כוסות קמח שקדים", "1/2 כוס זרעי פשתן טחונים", "4 ביצים", "1 כפית סודה לשתייה"] },
+            { id: 3, name: "לחם לטוסטים", img: "c.jpg", time: "35 דק'", category: "לחמים", description: "מתכון ייעודי ללחם שנפרס מושלם ועובר קלייה נהדרת.", tips: ["חשוב להשתמש בתבנית אינגליש קייק צרה."], ingredients: ["2.5 כוסות קמח שקדים", "1/4 כוס טחינה גולמית", "3 ביצים", "1/2 כוס מים"] },
+            { id: 4, name: "בייגלס רכים וממכרים", img: "d.jpg", time: "25 דק'", category: "לחמים", description: "בייגלס אמיתיים עם חור באמצע, רכים מבפנים.", tips: ["הרטבת הידיים עוזרת לעצב את הצורה בקלות."], ingredients: ["2 כוסות קמח שקדים", "1 כוס גבינת מוצרלה", "1 ביצה", "אבקת אפייה"] },
+            { id: 5, name: "פיצה לפסח קריספית", img: "e.jpg", time: "20 דק'", category: "לחמים", description: "בצק פיצה דק וקריספי שלא תאמיני שהוא כשר.", tips: ["חממי את התנור למקסימום לפני ההכנסה."], ingredients: ["1.5 כוסות קמח שקדים", "1 ביצה", "אורגנו", "רוטב עגבניות", "גבינה"] },
+            { id: 6, name: "בראוניז שוקולדיים", img: "f.jpg", time: "30 דק'", category: "מתוקים", description: "בראוניז נימוחים, שוקולדיים מאוד ומתוקים בדיוק.", tips: ["הסוד הוא לא לאפות דקה אחת יותר מדי."], ingredients: ["200 גרם שוקולד מריר", "1/2 כוס שמן קוקוס", "3 ביצים", "1 כוס קמח שקדים"] },
+            { id: 7, name: "חיתוכיות פקאן", img: "g.jpg", time: "25 דק'", category: "מתוקים", description: "ריבועי אנרגיה עשירים בפקאן ודבש.", tips: ["לחתוך לריבועים קטנים - זה מאוד עשיר."], ingredients: ["2 כוסות פקאנים", "1/2 כוס קמח שקדים", "1/4 כוס סילאן"] },
+            { id: 8, name: "חיתוכיות שוקולד אגוזים", img: "h.jpg", time: "20 דק'", category: "מתוקים", description: "קינוח ללא אפייה המשלב אגוזים ושוקולד.", tips: ["לשמור תמיד במקפיא ולהוציא רגע לפני ההגשה."], ingredients: ["שוקולד מריר", "אגוזי מלך", "חמאת שקדים"] },
+            { id: 9, name: "עוגיות שוקולד צ'יפס", img: "i.jpg", time: "12 דק'", category: "מתוקים", description: "העוגיות הקלאסיות בגרסה הבריאה שלנו.", tips: ["הן מתקשות רק אחרי שהן מתקררות."], ingredients: ["2 כוסות קמח שקדים", "1/2 כוס נטיפי שוקולד", "1/4 כוס שמן קוקוס"] },
+            { id: 10, name: "כדורי קפוצ'ינו", img: "j.jpg", time: "15 דק'", category: "מתוקים", description: "כדורי אנרגיה בטעם קפה מצופים שוקולד.", tips: ["ניתן לצפות בקוקוס טחון במקום שוקולד."], ingredients: ["תמרים", "קמח שקדים", "אבקת קפה נמס"] },
+            { id: 11, name: "עוגת מוס שוקולד", img: "k.jpg", time: "45 דק'", category: "מתוקים", description: "עוגה מרשימה לאירוח. בסיס שוקולדי ומוס עשיר.", tips: ["דורש קירור של לפחות 6 שעות."], ingredients: ["ביצים", "שוקולד מריר", "קרם קוקוס", "קמח שקדים"] },
+            { id: 12, name: "פאי תפוחים מפנק", img: "l.jpg", time: "50 דק'", category: "מתוקים", description: "בצק פריך במילוי תפוחים מקורמלים.", tips: ["לבחור תפוחים חמוצים (גראני סמית)."], ingredients: ["תפוחים ירוקים", "קינמון", "קמח שקדים", "ביצה"] }
         ];
 
         const shoppingData = [
             { category: "קמחים ובסיס", items: ["קמח שקדים (כמות גדולה)", "קוקוס טחון", "זרעי פשתן טחונים", "שומשום", "גרעיני חמניה ודלעת"] },
-            { category: "ממתיקים ושומנים", items: ["סילאן טבעי (ללא סוכר)", "דבש איכותי", "שמן קוקוס בכבישה קרה", "שמן זית איכותי"] },
-            { category: "אפייה ותבלינים", items: ["שוקולד מריר 70% ומעלה", "נטיפי שוקולד צ'יפס מריר", "אבקת קפה נמס", "סודה לשתייה", "תמצית ווניל טבעית", "קינמון ומלח גס"] },
-            { category: "טריים ואגוזים", items: ["ביצים (3 תבניות לפחות)", "תמרים מג'הול", "אגוזי מלך ופקאן טבעיים", "טחינה גולמית"] }
+            { category: "ממתיקים ושומנים", items: ["סילאן טבעי", "דבש איכותי", "שמן קוקוס בכבישה קרה", "שמן זית"] },
+            { category: "אפייה ותבלינים", items: ["שוקולד מריר 70%", "נטיפי שוקולד צ'יפס", "אבקת קפה נמס", "סודה לשתייה"] }
         ];
 
         const firebaseConfig = {
@@ -110,118 +119,209 @@
         const db = firebase.firestore();
 
         const App = () => {
-            const [user, setUser] = useState({ email: 'rivka@demo.com' }); 
-            const [hasAccess, setHasAccess] = useState(true); 
+            const [user, setUser] = useState(null); 
+            const [hasAccess, setHasAccess] = useState(false); 
+            const [loading, setLoading] = useState(true); 
             const [view, setView] = useState('home'); 
             const [selectedRecipe, setSelectedRecipe] = useState(null);
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             
-            const [likedRecipes, setLikedRecipes] = useState([]);
-            const [savedRecipes, setSavedRecipes] = useState([]);
-            const [filterSaved, setFilterSaved] = useState(false);
+            const [emailInput, setEmailInput] = useState(localStorage.getItem('savedEmail') || "");
+            const [passwordInput, setPasswordInput] = useState("");
+            const [loginError, setLoginError] = useState("");
+
+            // User Interactions
+            const [likedRecipes, setLikedRecipes] = useState(JSON.parse(localStorage.getItem('likes') || '[]'));
+            const [savedRecipes, setSavedRecipes] = useState(JSON.parse(localStorage.getItem('saves') || '[]'));
+            const [doneRecipes, setDoneRecipes] = useState(JSON.parse(localStorage.getItem('done') || '[]'));
+            const [recipeNotes, setRecipeNotes] = useState(JSON.parse(localStorage.getItem('notes') || '{}'));
+            const [checkedItems, setCheckedItems] = useState(JSON.parse(localStorage.getItem('checkedItems') || '[]'));
+            
+            const [searchQuery, setSearchQuery] = useState("");
+            const [categoryFilter, setCategoryFilter] = useState("הכל");
 
             const supportLink = "https://wa.me/504207702?text=היי+רבקה+יקירה,+יש+לי+שאלה+לגבי+הקורס";
 
+            // Screen Wake Lock Functionality
             useEffect(() => {
-                const handleScroll = () => {
-                    if (isMenuOpen) setIsMenuOpen(false);
+                let wakeLock = null;
+                const requestWakeLock = async () => {
+                    if (view === 'recipe' && 'wakeLock' in navigator) {
+                        try {
+                            wakeLock = await navigator.wakeLock.request('screen');
+                        } catch (err) {
+                            console.error(`${err.name}, ${err.message}`);
+                        }
+                    }
                 };
+                requestWakeLock();
+                return () => { if (wakeLock) wakeLock.release().then(() => wakeLock = null); };
+            }, [view]);
+
+            useEffect(() => {
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+                    return auth.onAuthStateChanged(async (u) => {
+                        if (u) {
+                            const cleanEmail = u.email.toLowerCase();
+                            const doc = await db.collection('paid_users').doc(cleanEmail).get();
+                            if (doc.exists && doc.data().hasAccess) {
+                                setHasAccess(true);
+                                setUser(u);
+                            } else { auth.signOut(); }
+                        }
+                        setLoading(false);
+                    });
+                });
+            }, []);
+
+            // Save interactions
+            useEffect(() => {
+                localStorage.setItem('likes', JSON.stringify(likedRecipes));
+                localStorage.setItem('saves', JSON.stringify(savedRecipes));
+                localStorage.setItem('done', JSON.stringify(doneRecipes));
+                localStorage.setItem('notes', JSON.stringify(recipeNotes));
+                localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
+            }, [likedRecipes, savedRecipes, doneRecipes, recipeNotes, checkedItems]);
+
+            // Close menu on scroll
+            useEffect(() => {
+                const handleScroll = () => { if (isMenuOpen) setIsMenuOpen(false); };
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, [isMenuOpen]);
 
-            useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            }, [view, user, hasAccess, isMenuOpen, likedRecipes, savedRecipes, filterSaved]);
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [view, user, isMenuOpen, loading, searchQuery, categoryFilter, doneRecipes]);
 
-            const toggleLike = (e, id) => {
-                e.stopPropagation();
-                setLikedRecipes(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                    await auth.signInWithEmailAndPassword(emailInput.trim().toLowerCase(), passwordInput);
+                    localStorage.setItem('savedEmail', emailInput);
+                } catch (err) {
+                    setLoginError("פרטי הכניסה אינם נכונים.");
+                    setLoading(false);
+                }
             };
 
-            const toggleSave = (e, id) => {
-                e.stopPropagation();
-                setSavedRecipes(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-            };
+            const filteredRecipes = useMemo(() => {
+                return recipesList.filter(r => {
+                    const matchesSearch = r.name.includes(searchQuery);
+                    const matchesCategory = categoryFilter === "הכל" || r.category === categoryFilter;
+                    return matchesSearch && matchesCategory;
+                });
+            }, [searchQuery, categoryFilter]);
 
-            const displayedRecipes = filterSaved 
-                ? recipesList.filter(r => savedRecipes.includes(r.id)) 
-                : recipesList;
+            const progress = (doneRecipes.length / recipesList.length) * 100;
 
-            // --- Views ---
+            if (loading) return (
+                <div className="h-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+                    <div className="w-10 h-10 border-4 border-[#B07D62] border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="font-bold text-[#1B4D3E]">מכינה את המטבח שלך...</p>
+                </div>
+            );
+
+            if (!user || !hasAccess) return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F8F9FA]">
+                    <div className="w-full max-w-md bg-white p-10 rounded-[40px] shadow-xl border-b-8 border-[#B07D62]">
+                        <div className="text-center mb-8">
+                             <h1 className="text-3xl font-bold text-[#1B4D3E]">כניסה לפורטל פסח</h1>
+                             <p className="text-gray-400 mt-2">הזיני פרטים כדי להתחיל לבשל בחירות</p>
+                        </div>
+                        <form onSubmit={handleLogin} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="block font-bold text-sm text-right mr-1">מייל</label>
+                                <input type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="block font-bold text-sm text-right mr-1">סיסמה</label>
+                                <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} className="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                            </div>
+                            {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
+                            <button className="w-full bg-[#B07D62] text-white py-5 rounded-2xl font-bold text-xl shadow-lg">התחברי לקורס</button>
+                        </form>
+                    </div>
+                    <p className="mt-8 text-gray-400 font-bold uppercase tracking-widest text-xs italic">רבקה הולצברג | המטבח הבריא</p>
+                </div>
+            );
 
             const HomeView = () => (
-                <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-8">
-                    <div className="bg-white rounded-[35px] p-6 md:p-10 mb-8 shadow-sm border border-gray-100 relative">
-                        <h1 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-2 leading-tight">פסח של חירות מתחיל כאן</h1>
-                        <p className="text-lg md:text-xl text-[#B07D62] font-medium mb-6">
-                            המדריך המלא למטבח בריא, פשוט וכשר לפסח - בלי פשרות על הטעם וההרגשה הטובה שלך.
-                        </p>
-                        <p className="text-base md:text-lg text-gray-600 mb-8 max-w-2xl leading-relaxed">
-                            ברוכה הבאה לפורטל האישי שלך.<br />
-                            הכל מוכן כאן עבורך כדי שתגיעי לחג ברוגע.
-                        </p>
+                <div className="max-w-7xl mx-auto px-4 pt-6">
+                    {/* Welcoming Hero */}
+                    <div className="bg-white rounded-[35px] p-6 md:p-12 mb-8 shadow-sm border border-gray-100 relative">
+                        <h1 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-3 leading-tight">פסח של חירות מתחיל כאן</h1>
+                        <p className="text-lg md:text-xl text-[#B07D62] font-medium mb-6">ברוכה הבאה לפורטל האישי שלך. הכל מוכן כדי שתגיעי לחג ברוגע.</p>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                        {/* Progress Bar */}
+                        <div className="mb-8 max-w-md">
+                            <div className="flex justify-between items-center mb-2 text-sm font-bold text-[#1B4D3E]">
+                                <span>ההתקדמות שלי לקראת החג</span>
+                                <span>{doneRecipes.length} מתוך {recipesList.length}</span>
+                            </div>
+                            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-[#B07D62] progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button onClick={() => setView('shopping')} className="flex items-center justify-between p-5 glass-card rounded-3xl hover:bg-white transition-all text-right">
                                 <div className="flex flex-col">
                                     <span className="font-bold text-[#1B4D3E] text-xl">עמוד הצטיידות מסודר</span>
-                                    <span className="text-xs text-gray-500 font-normal">נכנסות לפסח מוכנות. לא מנחשות.</span>
+                                    <span className="text-xs text-gray-500 font-normal leading-snug">נכנסות לפסח מוכנות. לא מנחשות.</span>
                                 </div>
-                                <i data-lucide="shopping-basket" className="text-[#B07D62] w-6 h-6"></i>
+                                <i data-lucide="shopping-basket" className="text-[#B07D62]"></i>
                             </button>
-                            <button className="flex items-center justify-between p-5 btn-gold rounded-3xl font-bold shadow-md text-lg">
-                                <span className="text-right">הדפסת חוברת המתכונים לפסח</span>
-                                <i data-lucide="printer" className="w-6 h-6"></i>
+                            <button className="flex items-center justify-between p-5 btn-gold rounded-3xl font-bold shadow-md text-lg text-right">
+                                <span>הדפסת חוברת המתכונים לפסח</span>
+                                <i data-lucide="printer"></i>
                             </button>
-                        </div>
-
-                        <div className="bg-[#B07D62]/5 p-6 rounded-[30px] border-2 border-[#B07D62]/10 border-dashed">
-                            <h3 className="text-xl font-bold mb-2 text-[#1B4D3E] flex items-center gap-2">
-                                <i data-lucide="gift" className="text-[#D4AF37] w-6 h-6"></i>
-                                בונוס מיוחד עבורך
-                            </h3>
-                            <p className="text-base text-gray-600 mb-4 italic">חוברת דיגיטלית עם 80+ מתכונים לכל השנה מחכה לך להורדה:</p>
-                            <button className="w-full md:w-auto px-10 btn-terracotta py-4 rounded-xl font-bold text-lg shadow-lg">הורידי את חוברת הבונוס</button>
                         </div>
                     </div>
 
-                    <div className="mb-16 px-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-                            <h2 className="text-2xl md:text-3xl font-bold text-[#1B4D3E]">שיעורי הקורס</h2>
-                            <div className="flex gap-2">
-                                <button onClick={() => setFilterSaved(false)} className={`px-4 py-2 rounded-full text-sm font-bold transition ${!filterSaved ? 'bg-[#1B4D3E] text-white' : 'bg-white text-gray-400 border border-gray-200'}`}>הכל</button>
-                                <button onClick={() => setFilterSaved(true)} className={`px-4 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${filterSaved ? 'bg-[#3b82f6] text-white' : 'bg-white text-gray-400 border border-gray-200'}`}>
-                                    <i data-lucide="bookmark" className="w-4 h-4"></i>
-                                    שמורים
-                                </button>
+                    <div className="mb-12">
+                        {/* Filters & Search */}
+                        <div className="flex flex-col gap-6 mb-10">
+                            <div className="relative max-w-xl">
+                                <input 
+                                    type="text" 
+                                    placeholder="חפשי מתכון (לחם, פיצה...)" 
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    className="w-full p-4 pr-12 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62] shadow-sm"
+                                />
+                                <i data-lucide="search" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 no-print">
+                                {["הכל", "לחמים", "מתוקים", "נשנושים"].map(cat => (
+                                    <button 
+                                        key={cat}
+                                        onClick={() => setCategoryFilter(cat)}
+                                        className={`px-6 py-2 rounded-full font-bold transition ${categoryFilter === cat ? 'bg-[#1B4D3E] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-200'}`}
+                                    >
+                                        {cat === "הכל" ? "הכל" : cat}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                            {displayedRecipes.map((r) => (
-                                <div key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); window.scrollTo(0,0); }} className="bg-white rounded-[35px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer flex flex-col relative">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredRecipes.map(r => (
+                                <div key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); window.scrollTo(0,0); }} className="bg-white rounded-[40px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer flex flex-col relative">
                                     <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                                        <button onClick={(e) => toggleLike(e, r.id)} className="bg-white/90 p-2 rounded-full shadow-sm">
-                                            <i data-lucide="heart" className={`w-5 h-5 ${likedRecipes.includes(r.id) ? 'heart-active' : 'text-gray-400'}`}></i>
-                                        </button>
-                                        <button onClick={(e) => toggleSave(e, r.id)} className="bg-white/90 p-2 rounded-full shadow-sm">
-                                            <i data-lucide="bookmark" className={`w-5 h-5 ${savedRecipes.includes(r.id) ? 'bookmark-active' : 'text-gray-400'}`}></i>
-                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); setLikedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm"><i data-lucide="heart" className={`w-5 h-5 ${likedRecipes.includes(r.id) ? 'heart-active' : 'text-gray-300'}`}></i></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setSavedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm"><i data-lucide="bookmark" className={`w-5 h-5 ${savedRecipes.includes(r.id) ? 'bookmark-active' : 'text-gray-300'}`}></i></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setDoneRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm" title="הכנתי!"><i data-lucide="check-circle" className={`w-5 h-5 ${doneRecipes.includes(r.id) ? 'done-active' : 'text-gray-300'}`}></i></button>
                                     </div>
-                                    <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+                                    <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
                                         <img src={r.img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                                        <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
-                                            <div className="bg-white/90 p-4 rounded-full shadow-lg">
-                                                <i data-lucide="play" className="text-[#B07D62] fill-[#B07D62] w-8 h-8"></i>
-                                            </div>
-                                        </div>
+                                        {doneRecipes.includes(r.id) && <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 font-bold text-xs rounded-bl-2xl shadow-md">הכנתי!</div>}
                                     </div>
-                                    <div className="p-6">
-                                        <h4 className="font-bold text-[#1B4D3E] text-xl mb-4 leading-tight">{r.name}</h4>
-                                        <div className="flex items-center justify-between text-sm text-gray-400 font-bold uppercase">
+                                    <div className="p-8">
+                                        <h4 className="font-bold text-[#1B4D3E] text-2xl mb-4 leading-tight">{r.name}</h4>
+                                        <div className="flex items-center justify-between text-sm font-bold text-gray-400">
                                             <span><i data-lucide="clock" className="w-4 h-4 inline ml-1"></i> {r.time}</span>
-                                            <span className="text-[#B07D62] underline">לשיעור</span>
+                                            <span className="text-[#B07D62]">לשיעור</span>
                                         </div>
                                     </div>
                                 </div>
@@ -231,144 +331,137 @@
                 </div>
             );
 
-            const RecipeView = ({ r }) => (
-                <div className="max-w-6xl mx-auto px-4 pt-6 pb-20">
-                    <div className="flex items-center justify-between mb-8 no-print">
-                        <button onClick={() => setView('home')} className="flex items-center gap-2 text-[#B07D62] font-bold hover:underline text-lg">
-                            <i data-lucide="arrow-right"></i> <span>חזרה</span>
-                        </button>
-                        <button onClick={() => window.print()} className="flex items-center gap-3 bg-[#B07D62] px-8 py-3 rounded-full font-bold text-white shadow-xl hover:scale-105 transition-all text-lg">
-                            <i data-lucide="printer" className="w-6 h-6"></i>
-                            <span>הדפיסי מתכון זה</span>
-                        </button>
-                    </div>
+            const RecipeView = ({ r }) => {
+                const [note, setNote] = useState(recipeNotes[r.id] || "");
+                const saveNote = (val) => {
+                    setNote(val);
+                    setRecipeNotes(prev => ({ ...prev, [r.id]: val }));
+                };
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <div className="lg:col-span-8 space-y-8">
-                            <div className="aspect-video bg-black rounded-[35px] overflow-hidden shadow-xl border-2 border-white no-print flex items-center justify-center text-white/40 flex-col gap-4">
-                                <i data-lucide="video" className="w-12 h-12"></i>
-                                <p className="font-bold">סרטון הדרכה: {r.name}</p>
-                            </div>
+                return (
+                    <div className="max-w-6xl mx-auto px-4 pt-6 pb-24 printable-content">
+                        <div className="flex items-center justify-between mb-8 no-print">
+                            <button onClick={() => setView('home')} className="flex items-center gap-2 text-[#B07D62] font-bold text-xl hover:underline"><i data-lucide="arrow-right"></i> <span>חזרה</span></button>
+                            <button onClick={() => window.print()} className="flex items-center gap-3 bg-[#B07D62] px-8 py-3 rounded-full font-bold text-white shadow-xl text-lg"><i data-lucide="printer"></i> <span>הדפיסי מתכון זה</span></button>
+                        </div>
 
-                            <div className="bg-white p-8 md:p-12 rounded-[45px] shadow-sm border-r-8 border-[#B07D62]">
-                                <h1 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-6">{r.name}</h1>
-                                <p className="text-xl text-gray-500 mb-10 italic">"{r.description}"</p>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-[#B07D62] mb-6">מה צריך?</h3>
-                                        <ul className="space-y-4">
-                                            {r.ingredients.map((ing, i) => (
-                                                <li key={i} className="flex items-center gap-3 text-lg border-b border-gray-50 pb-3">
-                                                    <i data-lucide="check" className="text-green-500 w-5 h-5"></i> {ing}
-                                                </li>
-                                            ))}
-                                        </ul>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                            <div className="lg:col-span-8 space-y-8">
+                                <div className="aspect-video bg-black rounded-[40px] overflow-hidden shadow-xl border-4 border-white no-print flex flex-col items-center justify-center text-white/40 text-center p-6">
+                                    <i data-lucide="play-circle" className="w-20 h-20 mb-4 text-[#B07D62]"></i>
+                                    <p className="text-xl font-bold">סרטון הדרכה: {r.name}</p>
+                                    <div className="mt-4 px-4 py-1 bg-[#10b981]/20 text-[#10b981] rounded-full text-sm border border-[#10b981]/20 flex items-center gap-2">
+                                        <i data-lucide="shield-check" className="w-4 h-4"></i>
+                                        מצב "ידיים נקיות" פעיל - המסך לא יכבה
                                     </div>
-                                    <div className="no-print">
-                                        <h3 className="text-2xl font-bold text-[#B07D62] mb-6">איך מכינים?</h3>
-                                        <p className="text-lg leading-relaxed text-gray-700">הוראות ההכנה המדויקות מופיעות בסרטון ההדרכה. מומלץ להכין הכל מראש על השיש ולעבוד יחד עם הסרטון צעד אחר צעד.</p>
+                                </div>
+
+                                <div className="bg-white p-8 md:p-14 rounded-[60px] shadow-sm border-r-8 border-[#B07D62]">
+                                    <h1 className="text-4xl font-bold text-[#1B4D3E] mb-6">{r.name}</h1>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-right">
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-[#B07D62] mb-6 border-b pb-2">מה צריך?</h3>
+                                            <ul className="space-y-4">
+                                                {r.ingredients.map((ing, i) => <li key={i} className="flex items-center gap-3 text-xl border-b border-gray-50 pb-2"><i data-lucide="check" className="text-green-500 w-5 h-5"></i> {ing}</li>)}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-[#B07D62] mb-6 border-b pb-2">איך מכינים?</h3>
+                                            <p className="text-lg leading-relaxed text-gray-700">הוראות ההכנה המדויקות מופיעות בסרטון ההדרכה. מומלץ להכין הכל מראש על השיש ולעבוד יחד עם הסרטון צעד אחר צעד.</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Personal Notes Section */}
+                                    <div className="mt-16 no-print">
+                                        <h3 className="text-xl font-bold text-[#1B4D3E] mb-4 flex items-center gap-2">
+                                            <i data-lucide="edit-3" className="w-5 h-5 text-[#B07D62]"></i>
+                                            הערות אישיות שלי למתכון
+                                        </h3>
+                                        <textarea 
+                                            value={note}
+                                            onChange={(e) => saveNote(e.target.value)}
+                                            placeholder="כאן תוכלי לכתוב לעצמך הערות לביצועים הבאים... למשל: הילדים אהבו פחות מלח."
+                                            className="w-full p-6 bg-gray-50 border border-gray-100 rounded-3xl outline-none focus:ring-2 focus:ring-[#B07D62] transition h-32 text-gray-700 leading-relaxed"
+                                        ></textarea>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="lg:col-span-4 no-print space-y-6">
-                            <div className="bg-[#D4AF37]/10 p-8 rounded-[40px] border-b-4 border-[#D4AF37]">
-                                <h3 className="text-xl font-bold text-[#B7950B] mb-6 flex items-center gap-2">
-                                    <i data-lucide="lightbulb" className="w-6 h-6"></i>
-                                    הטיפים של רבקה
-                                </h3>
-                                <ul className="space-y-4">
-                                    {r.tips.map((tip, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-lg text-gray-700 leading-snug">
-                                            <span className="text-[#B7950B] font-bold text-2xl leading-none mt-1">•</span>
-                                            <span>{tip}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className="lg:col-span-4 space-y-6 no-print">
+                                <div className="bg-[#D4AF37]/10 p-10 rounded-[50px] border-b-4 border-[#D4AF37] text-right">
+                                    <h3 className="text-2xl font-bold text-[#B7950B] mb-6 flex items-center gap-2"><i data-lucide="lightbulb" className="w-6 h-6"></i> הטיפים שלי</h3>
+                                    <ul className="space-y-6">
+                                        {r.tips.map((t, i) => <li key={i} className="text-lg leading-snug font-medium text-gray-700 border-b border-[#D4AF37]/20 pb-4">{t}</li>)}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            );
+                );
+            };
 
             const ShoppingView = () => (
-                <div className="max-w-4xl mx-auto px-4 pt-6 pb-20">
+                <div className="max-w-4xl mx-auto px-4 pt-6 pb-24 text-right">
                     <button onClick={() => setView('home')} className="mb-6 flex items-center gap-2 text-[#B07D62] font-bold text-lg no-print">
                         <i data-lucide="arrow-right"></i> <span>חזרה</span>
                     </button>
-                    <div className="bg-white p-8 md:p-16 rounded-[50px] shadow-xl border-b-8 border-[#1B4D3E]">
-                        <div className="text-center mb-10">
-                            <h1 className="text-3xl md:text-4xl font-bold text-[#1B4D3E] mb-4">עמוד הצטיידות</h1>
-                            <p className="text-xl text-gray-500 italic text-center leading-relaxed">נכנסות לפסח מוכנות. לא מנחשות.</p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-right">
+                    <div className="bg-white p-10 md:p-20 rounded-[60px] shadow-xl border-b-8 border-[#1B4D3E]">
+                        <h1 className="text-3xl md:text-4xl font-bold text-[#1B4D3E] text-center mb-10">עמוד הצטיידות</h1>
+                        <p className="text-xl text-gray-500 italic text-center mb-12">נכנסות לפסח מוכנות. לא מנחשות.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             {shoppingData.map((cat, i) => (
                                 <div key={i}>
                                     <h3 className="text-xl font-bold text-[#B07D62] border-b pb-3 mb-4">{cat.category}</h3>
-                                    <ul className="space-y-3">
+                                    <div className="space-y-4">
                                         {cat.items.map((item, j) => (
-                                            <li key={j} className="flex items-center gap-3 text-lg text-gray-700">
-                                                <div className="w-5 h-5 border-2 border-gray-200 rounded shrink-0"></div> {item}
-                                            </li>
+                                            <div key={j} onClick={() => toggleChecked(item)} className={`check-item flex items-center gap-3 text-lg ${checkedItems.includes(item) ? 'checked' : ''}`}>
+                                                <div className={`w-7 h-7 border-2 rounded shrink-0 flex items-center justify-center transition ${checkedItems.includes(item) ? 'bg-[#1B4D3E] border-[#1B4D3E]' : 'border-gray-200'}`}>
+                                                    {checkedItems.includes(item) && <i data-lucide="check" className="text-white w-5 h-5"></i>}
+                                                </div>
+                                                <span className="font-medium text-gray-700">{item}</span>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </div>
                             ))}
                         </div>
-                        <button onClick={() => window.print()} className="mt-12 w-full btn-terracotta py-4 rounded-xl font-bold text-lg no-print shadow-md">הדפסת רשימת הקניות</button>
                     </div>
                 </div>
             );
 
             return (
                 <div className="portal-wrapper min-h-screen">
-                    <header className="bg-white border-b border-gray-100 sticky top-0 z-50 w-full no-print h-20 flex items-center shadow-sm">
+                    <header className="bg-white border-b sticky top-0 z-50 h-24 flex items-center no-print shadow-sm">
                         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="relative">
-                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center gap-3 px-4 py-2 bg-[#F8F9FA] text-[#1B4D3E] hover:bg-gray-100 rounded-xl transition-all border border-gray-100">
-                                        <i data-lucide={isMenuOpen ? "x" : "menu"} className="w-6 h-6"></i>
-                                        <span className="font-bold text-lg">מה תרצי לעשות?</span>
+                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="px-6 py-2 bg-[#F8F9FA] text-[#1B4D3E] hover:bg-gray-100 rounded-xl font-bold text-xl flex items-center gap-4 border border-gray-100 shadow-sm">
+                                        <i data-lucide={isMenuOpen ? "x" : "menu"} className="w-8 h-8"></i>
+                                        <span>מה תרצי לעשות?</span>
                                     </button>
-                                    
                                     {isMenuOpen && (
-                                        <div className="absolute top-full right-0 mt-2 bg-white shadow-2xl rounded-3xl border border-gray-100 w-80 p-4 z-[100]">
-                                            <button onClick={() => { setView('home'); setIsMenuOpen(false); setFilterSaved(false); }} className="w-full text-right p-4 hover:bg-[#F8F9FA] rounded-2xl font-bold text-[#1B4D3E] flex items-center justify-between mb-2">
-                                                <span>דף הבית של הקורס</span> <i data-lucide="home" className="w-5 h-5"></i>
-                                            </button>
-                                            <button onClick={() => { setView('shopping'); setIsMenuOpen(false); }} className="w-full text-right p-4 hover:bg-[#F8F9FA] rounded-2xl font-bold text-[#1B4D3E] flex items-center justify-between mb-2">
-                                                <span>רשימת הצטיידות</span> <i data-lucide="shopping-bag" className="w-5 h-5"></i>
-                                            </button>
-                                            <div className="h-px bg-gray-100 my-2"></div>
-                                            <p className="text-[10px] font-bold text-gray-400 px-4 mb-2 uppercase tracking-widest">שיעורי הקורס</p>
-                                            <div className="max-h-64 overflow-y-auto pr-1">
-                                                {recipesList.map(r => (
-                                                    <button key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); setIsMenuOpen(false); }} className="w-full text-right p-3 hover:bg-gray-50 rounded-xl text-base text-gray-600 flex items-center justify-between">
-                                                        <span>{r.name}</span> <i data-lucide="chevron-left" className="w-3 h-3"></i>
-                                                    </button>
-                                                ))}
+                                        <div className="absolute top-full right-0 mt-3 bg-white shadow-2xl rounded-[35px] border border-gray-100 w-80 p-6 z-[100]">
+                                            <button onClick={() => { setView('home'); setIsMenuOpen(false); setFilterSaved(false); }} className="w-full text-right p-5 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>דף הבית</span> <i data-lucide="home"></i></button>
+                                            <button onClick={() => { setView('shopping'); setIsMenuOpen(false); }} className="w-full text-right p-5 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>רשימת הצטיידות</span> <i data-lucide="shopping-bag"></i></button>
+                                            <div className="h-px bg-gray-100 my-4"></div>
+                                            <div className="max-h-60 overflow-y-auto pr-2">
+                                                {recipesList.map(r => <button key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); setIsMenuOpen(false); }} className="w-full text-right p-3 hover:bg-gray-50 rounded-xl text-lg flex items-center justify-between text-gray-600 transition-colors"><span>{r.name}</span> <i data-lucide="chevron-left" className="w-4 h-4 text-gray-300"></i></button>)}
                                             </div>
                                         </div>
                                     )}
                                 </div>
-                                <span className="font-bold text-[#1B4D3E] text-xl italic whitespace-nowrap hidden xs:inline">פסח של חירות</span>
+                                <span className="font-bold text-[#1B4D3E] text-2xl italic hidden md:block">פסח של חירות</span>
                             </div>
-                            <button onClick={() => { auth.signOut(); setUser(null); }} className="p-2 text-gray-400 hover:text-red-500"><i data-lucide="log-out" className="w-6 h-6"></i></button>
+                            <button onClick={() => auth.signOut()} className="p-3 text-gray-400 hover:text-red-500 transition-all"><i data-lucide="log-out" className="w-8 h-8"></i></button>
                         </div>
                     </header>
 
-                    <main className="container-fluid">
-                        {view === 'home' && <HomeView />}
-                        {view === 'recipe' && <RecipeView r={selectedRecipe} />}
-                        {view === 'shopping' && <ShoppingView />}
-                    </main>
+                    <main>{view === 'home' && <HomeView />}{view === 'recipe' && <RecipeView r={selectedRecipe} />}{view === 'shopping' && <ShoppingView />}</main>
 
                     <div className="fixed bottom-6 left-6 z-40 no-print">
-                        <a href={supportLink} target="_blank" className="flex items-center gap-3 bg-[#25D366] text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all opacity-90 border border-white">
-                            <i data-lucide="message-circle" className="w-5 h-5"></i>
-                            <span className="font-bold text-sm">רבקה, יש לי שאלה</span>
+                        <a href={supportLink} target="_blank" className="flex items-center gap-3 bg-[#25D366] text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all border-2 border-white">
+                            <i data-lucide="message-circle" className="w-6 h-6"></i>
+                            <span className="font-bold text-base">רבקה, יש לי שאלה</span>
                         </a>
                     </div>
                 </div>
