@@ -70,7 +70,6 @@
             transition: all 0.2s;
         }
 
-        .heart-active { fill: #ef4444; color: #ef4444 !important; }
         .bookmark-active { fill: #3b82f6; color: #3b82f6 !important; }
         .done-active { color: #10b981 !important; }
 
@@ -80,10 +79,6 @@
 
         .check-item { transition: all 0.2s; cursor: pointer; }
         .check-item.checked { opacity: 0.6; text-decoration: line-through; }
-
-        /* Hide Scrollbar for category buttons */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* --- Print Styles - Compact & Clean --- */
         .print-only { display: none; }
@@ -155,9 +150,6 @@
         const { useState, useEffect, useMemo, useCallback } = React;
 
         // --- Custom Icons Components ---
-        const HeartIcon = ({ active }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={active ? "#ef4444" : "none"} stroke={active ? "#ef4444" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={active ? "heart-active" : "text-gray-400"}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        );
         const BookmarkIcon = ({ active }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={active ? "#3b82f6" : "none"} stroke={active ? "#3b82f6" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={active ? "bookmark-active" : "text-gray-400"}><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
         );
@@ -206,17 +198,20 @@
             searchQuery, setSearchQuery, 
             categoryFilter, setCategoryFilter,
             filteredRecipes, 
-            likedRecipes, setLikedRecipes,
             savedRecipes, setSavedRecipes,
             doneRecipes, setDoneRecipes,
             setView, setSelectedRecipe,
             progress
         }) => {
-            const categoriesOptions = [
+            
+            // חלוקה לוגית וויזואלית של כפתורי הסינון
+            const statusFilters = [
                 { id: "הכל", label: "הכל", icon: null },
-                { id: "מועדפים", label: "מועדפים", icon: "heart" },
                 { id: "שמורים", label: "שמורים", icon: "bookmark" },
-                { id: "הכנתי", label: "הכנתי", icon: "check-circle" },
+                { id: "הכנתי", label: "הכנתי", icon: "check-circle" }
+            ];
+
+            const typeFilters = [
                 { id: "לחמים", label: "לחמים", icon: null },
                 { id: "מתוקים", label: "מתוקים", icon: null },
                 { id: "נשנושים", label: "נשנושים", icon: null }
@@ -254,7 +249,7 @@
                     </div>
 
                     <div className="mb-12">
-                        <div className="flex flex-col gap-4 mb-8">
+                        <div className="flex flex-col gap-5 mb-8">
                             <div className="relative max-w-xl">
                                 <input 
                                     type="text" 
@@ -266,19 +261,36 @@
                                 <i data-lucide="search" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             </div>
 
-                            {/* Swipeable Horizontal Menu for Categories */}
-                            <div className="flex overflow-x-auto gap-3 pb-2 no-print hide-scrollbar">
-                                {categoriesOptions.map(cat => (
-                                    <button key={cat.id} onClick={() => setCategoryFilter(cat.id)}
-                                        className={`px-5 py-2.5 rounded-full font-bold transition whitespace-nowrap flex items-center gap-2 border shrink-0 ${
-                                            categoryFilter === cat.id 
-                                            ? 'bg-[#1B4D3E] text-white shadow-md border-[#1B4D3E]' 
-                                            : 'bg-white text-gray-500 border-gray-200 hover:border-[#B07D62]'
-                                        }`}>
-                                        {cat.icon && <i data-lucide={cat.icon} className={`w-4 h-4 ${categoryFilter === cat.id ? 'text-white' : 'text-[#B07D62]'}`}></i>}
-                                        <span>{cat.label}</span>
-                                    </button>
-                                ))}
+                            {/* מערכת סינון נגישה - שבירה לשורות מסודרות */}
+                            <div className="flex flex-col gap-3 no-print">
+                                {/* שורת סטטוסים אישיים */}
+                                <div className="flex flex-wrap gap-2">
+                                    {statusFilters.map(cat => (
+                                        <button key={cat.id} onClick={() => setCategoryFilter(cat.id)}
+                                            className={`px-5 py-2 rounded-full font-bold transition flex items-center gap-2 text-base ${
+                                                categoryFilter === cat.id 
+                                                ? 'bg-[#1B4D3E] text-white shadow-md' 
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}>
+                                            {cat.icon && <i data-lucide={cat.icon} className={`w-4 h-4 ${categoryFilter === cat.id ? 'text-white' : 'text-gray-400'}`}></i>}
+                                            <span>{cat.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                {/* שורת קטגוריות מתכונים */}
+                                <div className="flex flex-wrap gap-2">
+                                    {typeFilters.map(cat => (
+                                        <button key={cat.id} onClick={() => setCategoryFilter(cat.id)}
+                                            className={`px-5 py-2 rounded-full font-bold transition flex items-center gap-2 text-base border ${
+                                                categoryFilter === cat.id 
+                                                ? 'bg-[#1B4D3E] text-white shadow-md border-[#1B4D3E]' 
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-[#B07D62]'
+                                            }`}>
+                                            <span>{cat.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -291,7 +303,6 @@
                                 {filteredRecipes.map(r => (
                                     <div key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); window.scrollTo(0,0); }} className="bg-white rounded-[40px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer flex flex-col relative">
                                         <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                                            <button onClick={(e) => { e.stopPropagation(); setLikedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn" title="הוסף למועדפים"><HeartIcon active={likedRecipes.includes(r.id)} /></button>
                                             <button onClick={(e) => { e.stopPropagation(); setSavedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn" title="שמור מתכון"><BookmarkIcon active={savedRecipes.includes(r.id)} /></button>
                                             <button onClick={(e) => { e.stopPropagation(); setDoneRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn" title="סמן שהכנתי"><CheckIcon active={doneRecipes.includes(r.id)} /></button>
                                         </div>
@@ -466,7 +477,6 @@
             const [passwordInput, setPasswordInput] = useState("");
             const [loginError, setLoginError] = useState("");
 
-            const [likedRecipes, setLikedRecipes] = useState(JSON.parse(localStorage.getItem('likes') || '[]'));
             const [savedRecipes, setSavedRecipes] = useState(JSON.parse(localStorage.getItem('saves') || '[]'));
             const [doneRecipes, setDoneRecipes] = useState(JSON.parse(localStorage.getItem('done') || '[]'));
             const [recipeNotes, setRecipeNotes] = useState(JSON.parse(localStorage.getItem('notes') || '{}'));
@@ -514,12 +524,11 @@
             }, []);
 
             useEffect(() => {
-                localStorage.setItem('likes', JSON.stringify(likedRecipes));
                 localStorage.setItem('saves', JSON.stringify(savedRecipes));
                 localStorage.setItem('done', JSON.stringify(doneRecipes));
                 localStorage.setItem('notes', JSON.stringify(recipeNotes));
                 localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
-            }, [likedRecipes, savedRecipes, doneRecipes, recipeNotes, checkedItems]);
+            }, [savedRecipes, doneRecipes, recipeNotes, checkedItems]);
 
             useEffect(() => {
                 const handleScroll = () => { if (isMenuOpen) setIsMenuOpen(false); };
@@ -552,14 +561,13 @@
                     const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
                     
                     let matchesCategory = true;
-                    if (categoryFilter === "מועדפים") matchesCategory = likedRecipes.includes(r.id);
-                    else if (categoryFilter === "שמורים") matchesCategory = savedRecipes.includes(r.id);
+                    if (categoryFilter === "שמורים") matchesCategory = savedRecipes.includes(r.id);
                     else if (categoryFilter === "הכנתי") matchesCategory = doneRecipes.includes(r.id);
                     else if (categoryFilter !== "הכל") matchesCategory = r.category === categoryFilter;
 
                     return matchesSearch && matchesCategory;
                 });
-            }, [searchQuery, categoryFilter, likedRecipes, savedRecipes, doneRecipes]);
+            }, [searchQuery, categoryFilter, savedRecipes, doneRecipes]);
 
             const progress = (doneRecipes.length / recipesList.length) * 100;
 
@@ -635,7 +643,6 @@
                             searchQuery={searchQuery} setSearchQuery={setSearchQuery}
                             categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
                             filteredRecipes={filteredRecipes}
-                            likedRecipes={likedRecipes} setLikedRecipes={setLikedRecipes}
                             savedRecipes={savedRecipes} setSavedRecipes={setSavedRecipes}
                             doneRecipes={doneRecipes} setDoneRecipes={setDoneRecipes}
                             setView={setView} setSelectedRecipe={setSelectedRecipe}
