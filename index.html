@@ -63,16 +63,27 @@
             body { background: white; font-size: 14pt; }
         }
 
-        .heart-active { fill: #ef4444; stroke: #ef4444; }
-        .bookmark-active { fill: #3b82f6; stroke: #3b82f6; }
-        .done-active { fill: #10b981; stroke: #10b981; }
+        /* Fixed Icon States */
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 9999px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
 
-        /* Progress Bar */
+        .heart-active { fill: #ef4444; color: #ef4444 !important; }
+        .bookmark-active { fill: #3b82f6; color: #3b82f6 !important; }
+        .done-active { color: #10b981 !important; }
+
         .progress-bar-fill {
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Checklist effect */
         .check-item { transition: all 0.2s; cursor: pointer; }
         .check-item.checked { opacity: 0.5; text-decoration: line-through; }
     </style>
@@ -81,7 +92,18 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useCallback } = React;
+
+        // --- Custom Icons Components for Stability ---
+        const HeartIcon = ({ active }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={active ? "#ef4444" : "none"} stroke={active ? "#ef4444" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={active ? "heart-active" : "text-gray-400"}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        );
+        const BookmarkIcon = ({ active }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={active ? "#3b82f6" : "none"} stroke={active ? "#3b82f6" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={active ? "bookmark-active" : "text-gray-400"}><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        );
+        const CheckIcon = ({ active }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "#10b981" : "currentColor"} strokeWidth={active ? "4" : "2"} strokeLinecap="round" strokeLinejoin="round" className={active ? "text-[#10b981]" : "text-gray-400"}><polyline points="20 6 9 17 4 12"/></svg>
+        );
 
         // --- Data Definitions ---
         const recipesList = [
@@ -101,8 +123,8 @@
 
         const shoppingData = [
             { category: "קמחים ובסיס", items: ["קמח שקדים (כמות גדולה)", "קוקוס טחון", "זרעי פשתן טחונים", "שומשום", "גרעיני חמניה ודלעת"] },
-            { category: "ממתיקים ושומנים", items: ["סילאן טבעי", "דבש איכותי", "שמן קוקוס בכבישה קרה", "שמן זית"] },
-            { category: "אפייה ותבלינים", items: ["שוקולד מריר 70%", "נטיפי שוקולד צ'יפס", "אבקת קפה נמס", "סודה לשתייה"] }
+            { category: "ממתיקים ושומנים", items: ["סילאן טבעי (ללא סוכר)", "דבש איכותי", "שמן קוקוס בכבישה קרה", "שמן זית איכותי"] },
+            { category: "אפייה ותבלינים", items: ["שוקולד מריר 70% ומעלה", "נטיפי שוקולד צ'יפס מריר", "אבקת קפה נמס", "סודה לשתייה"] }
         ];
 
         const firebaseConfig = {
@@ -130,7 +152,6 @@
             const [passwordInput, setPasswordInput] = useState("");
             const [loginError, setLoginError] = useState("");
 
-            // User Interactions
             const [likedRecipes, setLikedRecipes] = useState(JSON.parse(localStorage.getItem('likes') || '[]'));
             const [savedRecipes, setSavedRecipes] = useState(JSON.parse(localStorage.getItem('saves') || '[]'));
             const [doneRecipes, setDoneRecipes] = useState(JSON.parse(localStorage.getItem('done') || '[]'));
@@ -142,16 +163,12 @@
 
             const supportLink = "https://wa.me/504207702?text=היי+רבקה+יקירה,+יש+לי+שאלה+לגבי+הקורס";
 
-            // Screen Wake Lock Functionality
+            // Silent Screen Wake Lock
             useEffect(() => {
                 let wakeLock = null;
                 const requestWakeLock = async () => {
                     if (view === 'recipe' && 'wakeLock' in navigator) {
-                        try {
-                            wakeLock = await navigator.wakeLock.request('screen');
-                        } catch (err) {
-                            console.error(`${err.name}, ${err.message}`);
-                        }
+                        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
                     }
                 };
                 requestWakeLock();
@@ -168,13 +185,15 @@
                                 setHasAccess(true);
                                 setUser(u);
                             } else { auth.signOut(); }
+                        } else {
+                            setUser(null);
+                            setHasAccess(false);
                         }
                         setLoading(false);
                     });
                 });
             }, []);
 
-            // Save interactions
             useEffect(() => {
                 localStorage.setItem('likes', JSON.stringify(likedRecipes));
                 localStorage.setItem('saves', JSON.stringify(savedRecipes));
@@ -183,14 +202,13 @@
                 localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
             }, [likedRecipes, savedRecipes, doneRecipes, recipeNotes, checkedItems]);
 
-            // Close menu on scroll
             useEffect(() => {
                 const handleScroll = () => { if (isMenuOpen) setIsMenuOpen(false); };
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, [isMenuOpen]);
 
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [view, user, isMenuOpen, loading, searchQuery, categoryFilter, doneRecipes]);
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [view, user, isMenuOpen, loading, searchQuery, categoryFilter]);
 
             const handleLogin = async (e) => {
                 e.preventDefault();
@@ -204,9 +222,17 @@
                 }
             };
 
+            const handleLogout = () => {
+                auth.signOut().then(() => {
+                    setUser(null);
+                    setHasAccess(false);
+                    setView('home');
+                });
+            };
+
             const filteredRecipes = useMemo(() => {
                 return recipesList.filter(r => {
-                    const matchesSearch = r.name.includes(searchQuery);
+                    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
                     const matchesCategory = categoryFilter === "הכל" || r.category === categoryFilter;
                     return matchesSearch && matchesCategory;
                 });
@@ -225,20 +251,29 @@
                 <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F8F9FA]">
                     <div className="w-full max-w-md bg-white p-10 rounded-[40px] shadow-xl border-b-8 border-[#B07D62]">
                         <div className="text-center mb-8">
+                             <div className="inline-flex p-4 bg-[#B07D62]/10 rounded-full text-[#B07D62] mb-4">
+                                <i data-lucide="lock" size="32"></i>
+                             </div>
                              <h1 className="text-3xl font-bold text-[#1B4D3E]">כניסה לפורטל פסח</h1>
                              <p className="text-gray-400 mt-2">הזיני פרטים כדי להתחיל לבשל בחירות</p>
                         </div>
                         <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="block font-bold text-sm text-right mr-1">מייל</label>
-                                <input type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                            <div className="space-y-2 text-right">
+                                <label className="block font-bold text-sm mr-1">כתובת מייל</label>
+                                <div className="relative">
+                                    <input type="email" value={emailInput} onChange={e => setEmailInput(e.target.value)} className="w-full p-4 pr-12 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                                    <i data-lucide="mail" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size="18"></i>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="block font-bold text-sm text-right mr-1">סיסמה</label>
-                                <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} className="w-full p-4 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                            <div className="space-y-2 text-right">
+                                <label className="block font-bold text-sm mr-1">סיסמה</label>
+                                <div className="relative">
+                                    <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} className="w-full p-4 pr-12 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62]" required />
+                                    <i data-lucide="key-round" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size="18"></i>
+                                </div>
                             </div>
-                            {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
-                            <button className="w-full bg-[#B07D62] text-white py-5 rounded-2xl font-bold text-xl shadow-lg">התחברי לקורס</button>
+                            {loginError && <p className="text-red-500 text-sm text-center font-bold">{loginError}</p>}
+                            <button className="w-full bg-[#B07D62] text-white py-5 rounded-2xl font-bold text-xl shadow-lg hover:scale-[1.02] transition">התחברי לקורס</button>
                         </form>
                     </div>
                     <p className="mt-8 text-gray-400 font-bold uppercase tracking-widest text-xs italic">רבקה הולצברג | המטבח הבריא</p>
@@ -246,28 +281,26 @@
             );
 
             const HomeView = () => (
-                <div className="max-w-7xl mx-auto px-4 pt-6">
-                    {/* Welcoming Hero */}
+                <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-8 pb-24">
                     <div className="bg-white rounded-[35px] p-6 md:p-12 mb-8 shadow-sm border border-gray-100 relative">
                         <h1 className="text-3xl md:text-5xl font-bold text-[#1B4D3E] mb-3 leading-tight">פסח של חירות מתחיל כאן</h1>
-                        <p className="text-lg md:text-xl text-[#B07D62] font-medium mb-6">ברוכה הבאה לפורטל האישי שלך. הכל מוכן כדי שתגיעי לחג ברוגע.</p>
+                        <p className="text-lg md:text-xl text-[#B07D62] font-medium mb-8">ברוכה הבאה לפורטל האישי שלך. הכל מוכן כדי שתגיעי לחג ברוגע.</p>
                         
-                        {/* Progress Bar */}
-                        <div className="mb-8 max-w-md">
+                        <div className="mb-10 max-w-md bg-[#10b981]/5 p-4 rounded-2xl border border-[#10b981]/10">
                             <div className="flex justify-between items-center mb-2 text-sm font-bold text-[#1B4D3E]">
-                                <span>ההתקדמות שלי לקראת החג</span>
-                                <span>{doneRecipes.length} מתוך {recipesList.length}</span>
+                                <span>התקדמות לקראת החג</span>
+                                <span>השלמתי {doneRecipes.length} מתוך {recipesList.length}</span>
                             </div>
-                            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#B07D62] progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                            <div className="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full bg-[#10b981] progress-bar-fill" style={{ width: `${progress}%` }}></div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button onClick={() => setView('shopping')} className="flex items-center justify-between p-5 glass-card rounded-3xl hover:bg-white transition-all text-right">
+                            <button onClick={() => setView('shopping')} className="flex items-center justify-between p-5 glass-card rounded-3xl hover:bg-white transition-all text-right group">
                                 <div className="flex flex-col">
-                                    <span className="font-bold text-[#1B4D3E] text-xl">עמוד הצטיידות מסודר</span>
-                                    <span className="text-xs text-gray-500 font-normal leading-snug">נכנסות לפסח מוכנות. לא מנחשות.</span>
+                                    <span className="font-bold text-[#1B4D3E] text-xl text-right">עמוד הצטיידות מסודר</span>
+                                    <span className="text-xs text-gray-500 font-normal">נכנסות לפסח מוכנות. לא מנחשות.</span>
                                 </div>
                                 <i data-lucide="shopping-basket" className="text-[#B07D62]"></i>
                             </button>
@@ -279,12 +312,11 @@
                     </div>
 
                     <div className="mb-12">
-                        {/* Filters & Search */}
                         <div className="flex flex-col gap-6 mb-10">
                             <div className="relative max-w-xl">
                                 <input 
                                     type="text" 
-                                    placeholder="חפשי מתכון (לחם, פיצה...)" 
+                                    placeholder="חפשי מתכון..." 
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
                                     className="w-full p-4 pr-12 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#B07D62] shadow-sm"
@@ -294,12 +326,9 @@
 
                             <div className="flex flex-wrap gap-2 no-print">
                                 {["הכל", "לחמים", "מתוקים", "נשנושים"].map(cat => (
-                                    <button 
-                                        key={cat}
-                                        onClick={() => setCategoryFilter(cat)}
-                                        className={`px-6 py-2 rounded-full font-bold transition ${categoryFilter === cat ? 'bg-[#1B4D3E] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-200'}`}
-                                    >
-                                        {cat === "הכל" ? "הכל" : cat}
+                                    <button key={cat} onClick={() => setCategoryFilter(cat)}
+                                        className={`px-6 py-2 rounded-full font-bold transition ${categoryFilter === cat ? 'bg-[#1B4D3E] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-200'}`}>
+                                        {cat}
                                     </button>
                                 ))}
                             </div>
@@ -309,19 +338,19 @@
                             {filteredRecipes.map(r => (
                                 <div key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); window.scrollTo(0,0); }} className="bg-white rounded-[40px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer flex flex-col relative">
                                     <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); setLikedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm"><i data-lucide="heart" className={`w-5 h-5 ${likedRecipes.includes(r.id) ? 'heart-active' : 'text-gray-300'}`}></i></button>
-                                        <button onClick={(e) => { e.stopPropagation(); setSavedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm"><i data-lucide="bookmark" className={`w-5 h-5 ${savedRecipes.includes(r.id) ? 'bookmark-active' : 'text-gray-300'}`}></i></button>
-                                        <button onClick={(e) => { e.stopPropagation(); setDoneRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="bg-white/95 p-2 rounded-full shadow-sm" title="הכנתי!"><i data-lucide="check-circle" className={`w-5 h-5 ${doneRecipes.includes(r.id) ? 'done-active' : 'text-gray-300'}`}></i></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setLikedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn"><HeartIcon active={likedRecipes.includes(r.id)} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setSavedRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn"><BookmarkIcon active={savedRecipes.includes(r.id)} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setDoneRecipes(p => p.includes(r.id) ? p.filter(id => id !== r.id) : [...p, r.id]); }} className="icon-btn"><CheckIcon active={doneRecipes.includes(r.id)} /></button>
                                     </div>
                                     <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
                                         <img src={r.img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                                        {doneRecipes.includes(r.id) && <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 font-bold text-xs rounded-bl-2xl shadow-md">הכנתי!</div>}
+                                        {doneRecipes.includes(r.id) && <div className="absolute top-0 right-0 bg-[#10b981] text-white px-4 py-1 font-bold text-xs rounded-bl-2xl shadow-md">הכנתי!</div>}
                                     </div>
-                                    <div className="p-8">
+                                    <div className="p-8 text-right">
                                         <h4 className="font-bold text-[#1B4D3E] text-2xl mb-4 leading-tight">{r.name}</h4>
                                         <div className="flex items-center justify-between text-sm font-bold text-gray-400">
                                             <span><i data-lucide="clock" className="w-4 h-4 inline ml-1"></i> {r.time}</span>
-                                            <span className="text-[#B07D62]">לשיעור</span>
+                                            <span className={doneRecipes.includes(r.id) ? "text-[#10b981]" : "text-[#B07D62]"}>לשיעור</span>
                                         </div>
                                     </div>
                                 </div>
@@ -332,28 +361,25 @@
             );
 
             const RecipeView = ({ r }) => {
-                const [note, setNote] = useState(recipeNotes[r.id] || "");
-                const saveNote = (val) => {
-                    setNote(val);
+                const [localNote, setLocalNote] = useState(recipeNotes[r.id] || "");
+                
+                const updateNote = (val) => {
+                    setLocalNote(val);
                     setRecipeNotes(prev => ({ ...prev, [r.id]: val }));
                 };
 
                 return (
-                    <div className="max-w-6xl mx-auto px-4 pt-6 pb-24 printable-content">
+                    <div className="max-w-6xl mx-auto px-4 pt-6 pb-24 printable-content text-right">
                         <div className="flex items-center justify-between mb-8 no-print">
                             <button onClick={() => setView('home')} className="flex items-center gap-2 text-[#B07D62] font-bold text-xl hover:underline"><i data-lucide="arrow-right"></i> <span>חזרה</span></button>
-                            <button onClick={() => window.print()} className="flex items-center gap-3 bg-[#B07D62] px-8 py-3 rounded-full font-bold text-white shadow-xl text-lg"><i data-lucide="printer"></i> <span>הדפיסי מתכון זה</span></button>
+                            <button onClick={() => window.print()} className="flex items-center gap-3 bg-[#B07D62] px-8 py-3 rounded-full font-bold text-white shadow-xl text-lg"><i data-lucide="printer"></i> <span>הדפסי מתכון</span></button>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                             <div className="lg:col-span-8 space-y-8">
-                                <div className="aspect-video bg-black rounded-[40px] overflow-hidden shadow-xl border-4 border-white no-print flex flex-col items-center justify-center text-white/40 text-center p-6">
+                                <div className="aspect-video bg-black rounded-[40px] overflow-hidden shadow-xl border-4 border-white no-print flex flex-col items-center justify-center text-white/40">
                                     <i data-lucide="play-circle" className="w-20 h-20 mb-4 text-[#B07D62]"></i>
-                                    <p className="text-xl font-bold">סרטון הדרכה: {r.name}</p>
-                                    <div className="mt-4 px-4 py-1 bg-[#10b981]/20 text-[#10b981] rounded-full text-sm border border-[#10b981]/20 flex items-center gap-2">
-                                        <i data-lucide="shield-check" className="w-4 h-4"></i>
-                                        מצב "ידיים נקיות" פעיל - המסך לא יכבה
-                                    </div>
+                                    <p className="font-bold">סרטון הדרכה: {r.name}</p>
                                 </div>
 
                                 <div className="bg-white p-8 md:p-14 rounded-[60px] shadow-sm border-r-8 border-[#B07D62]">
@@ -366,32 +392,34 @@
                                             </ul>
                                         </div>
                                         <div>
-                                            <h3 className="text-2xl font-bold text-[#B07D62] mb-6 border-b pb-2">איך מכינים?</h3>
-                                            <p className="text-lg leading-relaxed text-gray-700">הוראות ההכנה המדויקות מופיעות בסרטון ההדרכה. מומלץ להכין הכל מראש על השיש ולעבוד יחד עם הסרטון צעד אחר צעד.</p>
+                                            <h3 className="text-2xl font-bold text-[#B07D62] mb-6 border-b pb-2 text-right">איך מכינים?</h3>
+                                            <p className="text-lg leading-relaxed text-gray-700">הוראות ההכנה המדויקות מופיעות בסרטון ההדרכה. מומלץ להכין הכל מראש ולעבוד שלב אחרי שלב יחד איתי.</p>
                                         </div>
                                     </div>
 
-                                    {/* Personal Notes Section */}
-                                    <div className="mt-16 no-print">
-                                        <h3 className="text-xl font-bold text-[#1B4D3E] mb-4 flex items-center gap-2">
+                                    <div className="mt-16 no-print text-right">
+                                        <h3 className="text-xl font-bold text-[#1B4D3E] mb-4 flex items-center justify-start gap-2">
                                             <i data-lucide="edit-3" className="w-5 h-5 text-[#B07D62]"></i>
                                             הערות אישיות שלי למתכון
                                         </h3>
                                         <textarea 
-                                            value={note}
-                                            onChange={(e) => saveNote(e.target.value)}
-                                            placeholder="כאן תוכלי לכתוב לעצמך הערות לביצועים הבאים... למשל: הילדים אהבו פחות מלח."
-                                            className="w-full p-6 bg-gray-50 border border-gray-100 rounded-3xl outline-none focus:ring-2 focus:ring-[#B07D62] transition h-32 text-gray-700 leading-relaxed"
+                                            value={localNote}
+                                            onChange={(e) => updateNote(e.target.value)}
+                                            placeholder="כתבי כאן הערות לעצמך... (הטקסט נשמר אוטומטית)"
+                                            className="w-full p-6 bg-gray-50 border border-gray-100 rounded-3xl outline-none focus:ring-2 focus:ring-[#B07D62] transition h-32 text-gray-700 leading-relaxed text-right"
                                         ></textarea>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="lg:col-span-4 space-y-6 no-print">
-                                <div className="bg-[#D4AF37]/10 p-10 rounded-[50px] border-b-4 border-[#D4AF37] text-right">
-                                    <h3 className="text-2xl font-bold text-[#B7950B] mb-6 flex items-center gap-2"><i data-lucide="lightbulb" className="w-6 h-6"></i> הטיפים שלי</h3>
+                            <div className="lg:col-span-4 space-y-6 no-print text-right">
+                                <div className="bg-[#D4AF37]/10 p-8 rounded-[40px] border-b-4 border-[#D4AF37]">
+                                    <h3 className="text-2xl font-bold text-[#B7950B] mb-6 flex items-center justify-start gap-2">
+                                        <i data-lucide="lightbulb" className="w-6 h-6"></i>
+                                        הטיפים שלי
+                                    </h3>
                                     <ul className="space-y-6">
-                                        {r.tips.map((t, i) => <li key={i} className="text-lg leading-snug font-medium text-gray-700 border-b border-[#D4AF37]/20 pb-4">{t}</li>)}
+                                        {r.tips.map((t, i) => <li key={i} className="text-lg leading-snug font-medium text-gray-700 border-b border-[#D4AF37]/20 pb-4">• {t}</li>)}
                                     </ul>
                                 </div>
                             </div>
@@ -414,7 +442,7 @@
                                     <h3 className="text-xl font-bold text-[#B07D62] border-b pb-3 mb-4">{cat.category}</h3>
                                     <div className="space-y-4">
                                         {cat.items.map((item, j) => (
-                                            <div key={j} onClick={() => toggleChecked(item)} className={`check-item flex items-center gap-3 text-lg ${checkedItems.includes(item) ? 'checked' : ''}`}>
+                                            <div key={j} onClick={() => setCheckedItems(p => p.includes(item) ? p.filter(i => i !== item) : [...p, item])} className={`check-item flex items-center gap-3 text-lg ${checkedItems.includes(item) ? 'checked' : ''}`}>
                                                 <div className={`w-7 h-7 border-2 rounded shrink-0 flex items-center justify-center transition ${checkedItems.includes(item) ? 'bg-[#1B4D3E] border-[#1B4D3E]' : 'border-gray-200'}`}>
                                                     {checkedItems.includes(item) && <i data-lucide="check" className="text-white w-5 h-5"></i>}
                                                 </div>
@@ -435,31 +463,31 @@
                         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="relative">
-                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="px-6 py-2 bg-[#F8F9FA] text-[#1B4D3E] hover:bg-gray-100 rounded-xl font-bold text-xl flex items-center gap-4 border border-gray-100 shadow-sm">
-                                        <i data-lucide={isMenuOpen ? "x" : "menu"} className="w-8 h-8"></i>
+                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="px-5 py-2 bg-[#F8F9FA] text-[#1B4D3E] hover:bg-gray-100 rounded-xl font-bold text-lg flex items-center gap-3 border">
+                                        <i data-lucide={isMenuOpen ? "x" : "menu"}></i>
                                         <span>מה תרצי לעשות?</span>
                                     </button>
                                     {isMenuOpen && (
-                                        <div className="absolute top-full right-0 mt-3 bg-white shadow-2xl rounded-[35px] border border-gray-100 w-80 p-6 z-[100]">
-                                            <button onClick={() => { setView('home'); setIsMenuOpen(false); setFilterSaved(false); }} className="w-full text-right p-5 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>דף הבית</span> <i data-lucide="home"></i></button>
-                                            <button onClick={() => { setView('shopping'); setIsMenuOpen(false); }} className="w-full text-right p-5 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>רשימת הצטיידות</span> <i data-lucide="shopping-bag"></i></button>
+                                        <div className="absolute top-full right-0 mt-3 bg-white shadow-2xl rounded-[35px] border w-80 p-6 z-[100] text-right">
+                                            <button onClick={() => { setView('home'); setIsMenuOpen(false); }} className="w-full p-4 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>דף הבית</span> <i data-lucide="home"></i></button>
+                                            <button onClick={() => { setView('shopping'); setIsMenuOpen(false); }} className="w-full p-4 hover:bg-gray-50 rounded-2xl font-bold flex items-center justify-between text-xl text-[#1B4D3E]"><span>רשימת הצטיידות</span> <i data-lucide="shopping-bag"></i></button>
                                             <div className="h-px bg-gray-100 my-4"></div>
                                             <div className="max-h-60 overflow-y-auto pr-2">
-                                                {recipesList.map(r => <button key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); setIsMenuOpen(false); }} className="w-full text-right p-3 hover:bg-gray-50 rounded-xl text-lg flex items-center justify-between text-gray-600 transition-colors"><span>{r.name}</span> <i data-lucide="chevron-left" className="w-4 h-4 text-gray-300"></i></button>)}
+                                                {recipesList.map(r => <button key={r.id} onClick={() => { setSelectedRecipe(r); setView('recipe'); setIsMenuOpen(false); }} className="w-full text-right p-3 hover:bg-gray-50 rounded-xl text-lg flex items-center justify-between text-gray-600"><span>{r.name}</span> <i data-lucide="chevron-left" className="w-4 h-4"></i></button>)}
                                             </div>
                                         </div>
                                     )}
                                 </div>
                                 <span className="font-bold text-[#1B4D3E] text-2xl italic hidden md:block">פסח של חירות</span>
                             </div>
-                            <button onClick={() => auth.signOut()} className="p-3 text-gray-400 hover:text-red-500 transition-all"><i data-lucide="log-out" className="w-8 h-8"></i></button>
+                            <button onClick={handleLogout} className="p-3 text-gray-400 hover:text-red-500 transition-all"><i data-lucide="log-out" className="w-8 h-8"></i></button>
                         </div>
                     </header>
 
                     <main>{view === 'home' && <HomeView />}{view === 'recipe' && <RecipeView r={selectedRecipe} />}{view === 'shopping' && <ShoppingView />}</main>
 
                     <div className="fixed bottom-6 left-6 z-40 no-print">
-                        <a href={supportLink} target="_blank" className="flex items-center gap-3 bg-[#25D366] text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all border-2 border-white">
+                        <a href={supportLink} target="_blank" className="flex items-center gap-3 bg-[#25D366] text-white px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all border-2 border-white">
                             <i data-lucide="message-circle" className="w-6 h-6"></i>
                             <span className="font-bold text-base">רבקה, יש לי שאלה</span>
                         </a>
