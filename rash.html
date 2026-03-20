@@ -117,7 +117,6 @@
         const Heart = (p) => <IconWrapper {...p}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconWrapper>;
 
         const App = () => {
-            // NEW URL UPDATED AS REQUESTED
             const purchaseUrl = "https://private.invoice4u.co.il/newsite/he/clearing/public/i4u-clearing?ProductGuid=f09a0a8d-234d-4d77-b0bf-125eb137412a";
             
             const [showFloatingBtn, setShowFloatingBtn] = useState(false);
@@ -128,7 +127,6 @@
                     if (window.scrollY > 800) setShowFloatingBtn(true);
                     else setShowFloatingBtn(false);
 
-                    // Close recipe modal when user scrolls
                     if (selectedRecipe) {
                         setSelectedRecipe(null);
                     }
@@ -165,7 +163,8 @@
                 { name: "עוגיות שוקולד צ'יפס", img: "i.jpg" },
                 { name: "כדורי קפוצ'ינו בציפוי שוקולד", img: "j.jpg" },
                 { name: "עוגת מוס שוקולד", img: "k.jpg" },
-                { name: "פאי תפוחים מפנק", img: "l.jpg" }
+                { name: "פאי תפוחים מפנק", img: "l.jpg" },
+                { name: "טראפלס שוקולד מפנק", img: "m.jpg" } // הוספת המתכון ה-13
             ];
 
             const testimonials = [
@@ -211,7 +210,7 @@
                                     <Leaf size={16} className="text-[#B07D62]" />
                                     <span>ללא גלוטן | ללא סוכר | ללא קטניות</span>
                                     <span className="hidden md:inline">|</span>
-                                    <span className="highlight px-2 py-0.5">ללא קמח תפוחי אדמה</span>
+                                    <span className="highlight px-2 py-0.5">13 מתכונים מעולים</span>
                                     <span className="hidden md:inline">|</span>
                                     <span>פשוט להכנה</span>
                                 </div>
@@ -326,12 +325,12 @@
                         </div>
                     </section>
 
-                    {/* Interactive 12 Recipes List */}
+                    {/* Interactive 13 Recipes List */}
                     <section className="py-24 bg-[#1B4D3E] text-white">
                         <div className="max-w-6xl mx-auto px-4 text-center">
                             <div className="mb-16">
                                 <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight leading-tight">
-                                    <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0 font-bold">12 מתכונים</span> שפשוט... עובדים.
+                                    <span className="bg-white/10 px-6 py-1 rounded-xl border border-white/20 block md:inline-block mb-4 md:mb-0 font-bold text-white">13 מתכונים</span> שפשוט... עובדים.
                                 </h2>
                                 <p className="text-xl text-green-100/80 font-light italic">לחצי על שם המתכון כדי לראות אותו</p>
                             </div>
@@ -432,7 +431,7 @@
                                 <div className="gold-badge-shine text-white px-8 py-3 rounded-full font-bold shadow-lg mb-10 inline-block italic tracking-widest uppercase text-sm md:text-base">קורס פסח של חירות</div>
                                 
                                 <div className="space-y-4 mb-10 text-right max-w-sm mx-auto">
-                                    <div className="flex items-center gap-3 text-lg font-medium font-medium"><Check className="text-[#B07D62] shrink-0"/> <span><span className="highlight text-primary font-semibold">12 מתכונים</span> פשוטים ומדויקים</span></div>
+                                    <div className="flex items-center gap-3 text-lg font-medium"><Check className="text-[#B07D62] shrink-0"/> <span><span className="highlight text-primary font-semibold">13 מתכונים</span> פשוטים ומדויקים</span></div>
                                     <div className="flex items-center gap-3 text-lg font-medium"><Check className="text-[#B07D62] shrink-0"/> סרטון הדרכה לכל מתכון</div>
                                     <div className="flex items-center gap-3 text-lg font-medium"><Check className="text-[#B07D62] shrink-0"/> טיפים + המלצות קנייה + הדפסה</div>
                                     <div className="flex items-center gap-3 text-lg font-medium"><Check className="text-[#B07D62] shrink-0"/> עמוד הצטיידות מסודר</div>
