@@ -303,7 +303,7 @@
                 time: "15 דק'", 
                 category: "מתוקים", 
                 description: "כשר לפסח | ללא גלוטן | ללא סוכר. קינוח מהיר ואלגנטי לפסח.", 
-                ingredients: ["100 גרם (1 כוס) קמח שקדים", "25 גרם (1/4 כוס) אגוזים טחונים", "30 גרם (2 כפות) חמאת אגוזים", "30 מ״ל (1/8 כוס) מים חמים", "1 כף קפה נמס", "45 גרם (3 כפות) ממתיק", "100 גרם שוקולד מריר איכותי", "1 כפית שמן קוקוס / צמחי"], 
+                ingredients: ["100 גרם (1 כוס) קמח שקדים", "25 גרם (1/4 כוס) אגוזים טחונים", "30 גרם (2 כפות) חמאת שקדים", "30 מ״ל (1/8 כוס) מים חמים", "1 כף קפה נמס", "45 גרם (3 כפות) ממתיק", "100 גרם שוקולד מריר איכותי", "1 כפית שמן קוקוס / צמחי"], 
                 instructions: ["בקערה מערבבים את כל המרכיבים חוץ מהשוקולד והשמן עד שמתקבל בצק אחיד.", "מגלגלים לכדורים קטנים בגודל אחיד.", "ממיסים את השוקולד עם מעט שמן עד לקבלת תערובת חלקה.", "מצפים את הכדורים: אפשר לזלף מעל שוקולד למראה עדין, או לטבול את הכדורים בשוקולד לתוצאה עשירה.", "מעבירים למקרר להתייצבות."],
                 tips: ["חשוב: את הקפה ממיסים קודם במים חמים – זה פותח את הטעמים ונותן לכדורים טעם קפוצ'ינו מודגש ומדויק יותר.", "אם הבצק יוצא דביק מדי – מוסיפים עוד מעט קמח שקדים בהדרגה, עד שמתקבל מרקם רך אבל נוח לגלגול.", "המרקם הנכון הוא כזה שלא נדבק לידיים אבל עדיין נשאר רך ונעים.", "מומלץ להכין כדורים קטנים–בינוניים כדי שייצאו יפים, נוחים לאכילה ויקבלו ציפוי מושלם.", "לא לחמם יותר מדי את השוקולד – כדי לשמור על שוקולד מבריק ונוח לעבודה.", "שימוש בשוקולד מריר איכותי עושה הבדל גדול בטעם הסופי.", "אחרי קירור – הטעמים מתחדדים והמרקם הופך מושלם."], 
                 vimeoId: "1175227091", 
@@ -425,10 +425,10 @@
                                 </div>
                                 <LucideIcon name="shopping-basket" className="text-[#B07D62] w-8 h-8" />
                             </button>
-                            <button onClick={() => window.print()} className="flex items-center justify-between p-5 btn-gold rounded-3xl font-bold shadow-md text-lg text-right">
+                            <a href="https://drive.google.com/file/d/1XPZVcXaaTnvqltaNxOWT4f5EVtE5XITr/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 btn-gold rounded-3xl font-bold shadow-md text-lg text-right">
                                 <span>הדפסת חוברת המתכונים</span>
                                 <LucideIcon name="printer" className="w-8 h-8" />
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -715,16 +715,6 @@
                             amount = 0; 
                         }
 
-                        if (name.includes("קמח שקדים")) name = "קמח שקדים";
-                        else if (name.includes("שוקולד מריר")) name = "שוקולד מריר";
-                        else if (name.includes("קרם קוקוס")) name = "קרם קוקוס";
-                        else if (name.includes("שמן קוקוס")) name = "שמן קוקוס";
-                        else if (name.includes("חמאת שקדים") || name.includes("חמאת אגוזים") || name.includes("טחינה")) name = "חמאת שקדים / חמאת אגוזים / טחינה";
-                        else if (name.includes("ממתיק") || name.includes("סילאן") || name.includes("דבש")) name = "ממתיק (סילאן / דבש / אבקתי)";
-                        else if (name.includes("אגוז") || name.includes("פקאן") || name.includes("שומשום") || name.includes("חמניה") || name.includes("פשתן")) name = "אגוזים וזרעים (טבעי, קצוץ, טחון)";
-                        else if (name.includes("תמרים")) name = "תמרים";
-                        else if (name.includes("גבינ") || name.includes("קוטג") || name.includes("יוגורט") || name.includes("מוצרלה")) name = "מוצרי חלב (גבינות / יוגורט)";
-                        
                         if (!aggregated[name]) {
                             aggregated[name] = { amount: 0, unit: unit, items: new Set() };
                         }
