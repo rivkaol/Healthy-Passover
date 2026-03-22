@@ -508,7 +508,7 @@
             doneRecipes, setDoneRecipes,
             setView, setSelectedRecipe,
             progress,
-            isSyncing
+            syncStatus
         }) => {
             
             const statusFilters = [
@@ -535,11 +535,12 @@
                                 <div className="flex justify-between items-center text-sm font-bold text-[#1B4D3E]">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                         <span>ההתקדמות האישית שלך לקראת החג</span>
-                                        {isSyncing ? (
+                                        {syncStatus === 'syncing' && (
                                             <span className="flex items-center gap-1 text-xs text-gray-500 font-normal">
                                                 <LucideIcon name="refresh-cw" className="w-3 h-3 animate-spin" /> מסנכרן לענן...
                                             </span>
-                                        ) : (
+                                        )}
+                                        {syncStatus === 'saved' && (
                                             <span className="flex items-center gap-1 text-xs text-[#10b981] font-normal">
                                                 <LucideIcon name="check" className="w-3 h-3" /> מגובה בענן
                                             </span>
@@ -980,10 +981,11 @@
             const [passwordInput, setPasswordInput] = useState("");
             const [loginError, setLoginError] = useState("");
 
-            const [savedRecipes, setSavedRecipes] = useState(JSON.parse(localStorage.getItem('saves') || '[]'));
-            const [doneRecipes, setDoneRecipes] = useState(JSON.parse(localStorage.getItem('done') || '[]'));
-            const [recipeNotes, setRecipeNotes] = useState(JSON.parse(localStorage.getItem('notes') || '{}'));
-            const [checkedItems, setCheckedItems] = useState(JSON.parse(localStorage.getItem('checkedItems') || '[]'));
+            // מתחילים רשימות ריקות, כדי לא לדרוס בטעות לפני שמגיע המידע מהענן
+            const [savedRecipes, setSavedRecipes] = useState([]);
+            const [doneRecipes, setDoneRecipes] = useState([]);
+            const [recipeNotes, setRecipeNotes] = useState({});
+            const [checkedItems, setCheckedItems] = useState([]);
             
             const [searchQuery, setSearchQuery] = useState("");
             const [categoryFilter, setCategoryFilter] = useState("הכל");
@@ -992,8 +994,9 @@
 
             const previewMode = false; // הגדרת אבטחה מופעלת
             
-            const isInitialLoad = useRef(true);
-            const [isSyncing, setIsSyncing] = useState(false);
+            // משתני עזר לסנכרון
+            const [dataLoaded, setDataLoaded] = useState(false);
+            const [syncStatus, setSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'saved'
 
             useEffect(() => {
                 let wakeLock = null;
@@ -1017,6 +1020,7 @@
                         if (u) {
                             const cleanEmail = u.email.toLowerCase();
                             const doc = await db.collection('paid_users').doc(cleanEmail).get();
+                            
                             if (doc.exists && doc.data().hasAccess) {
                                 setHasAccess(true);
                                 setUser(u);
@@ -1025,17 +1029,22 @@
                                     const activityDoc = await db.collection('user_activity').doc(cleanEmail).get();
                                     if (activityDoc.exists) {
                                         const data = activityDoc.data();
+                                        // טוענים הכל מהענן
                                         if (data.savedRecipes) setSavedRecipes(data.savedRecipes);
                                         if (data.doneRecipes) setDoneRecipes(data.doneRecipes);
                                         if (data.recipeNotes) setRecipeNotes(data.recipeNotes);
                                         if (data.checkedItems) setCheckedItems(data.checkedItems);
+                                    } else {
+                                        // אם אין נתונים בענן, מנסים לטעון מה-LocalStorage של המכשיר הנוכחי
+                                        setSavedRecipes(JSON.parse(localStorage.getItem('saves') || '[]'));
+                                        setDoneRecipes(JSON.parse(localStorage.getItem('done') || '[]'));
+                                        setRecipeNotes(JSON.parse(localStorage.getItem('notes') || '{}'));
+                                        setCheckedItems(JSON.parse(localStorage.getItem('checkedItems') || '[]'));
                                     }
                                 } catch (err) {
-                                    console.error("Error loading activity data:", err);
+                                    console.error("Error loading data:", err);
                                 } finally {
-                                    setTimeout(() => {
-                                        isInitialLoad.current = false;
-                                    }, 1000);
+                                    setDataLoaded(true); // סימן שסיימנו לטעון - עכשיו מותר לשמור
                                 }
                             } else { auth.signOut(); }
                         } else {
@@ -1047,17 +1056,12 @@
                 });
             }, []);
 
-            // שמירה ל-LocalStorage וגם סנכרון בזמן אמת ל-Firestore
+            // שמירה לענן - רץ רק אחרי שהטעינה הראשונית הסתיימה
             useEffect(() => {
-                localStorage.setItem('saves', JSON.stringify(savedRecipes));
-                localStorage.setItem('done', JSON.stringify(doneRecipes));
-                localStorage.setItem('notes', JSON.stringify(recipeNotes));
-                localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
-
-                if (isInitialLoad.current || !user || !hasAccess) return;
+                if (!dataLoaded || !user || !hasAccess) return;
 
                 const syncData = async () => {
-                    setIsSyncing(true);
+                    setSyncStatus('syncing');
                     try {
                         const cleanEmail = user.email.toLowerCase();
                         await db.collection('user_activity').doc(cleanEmail).set({
@@ -1067,15 +1071,26 @@
                             checkedItems,
                             lastUpdated: new Date().toISOString()
                         }, { merge: true });
+                        
+                        // שומרים גם מקומית ליתר ביטחון
+                        localStorage.setItem('saves', JSON.stringify(savedRecipes));
+                        localStorage.setItem('done', JSON.stringify(doneRecipes));
+                        localStorage.setItem('notes', JSON.stringify(recipeNotes));
+                        localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
+
+                        setSyncStatus('saved');
+                        // מוחק את ההודעה אחרי 2 שניות בדיוק
+                        setTimeout(() => setSyncStatus('idle'), 2000);
+
                     } catch (err) {
-                        console.error("Error syncing to Firestore:", err);
-                    } finally {
-                        setTimeout(() => setIsSyncing(false), 800);
+                        console.error("Sync error:", err);
+                        setSyncStatus('idle');
                     }
                 };
 
-                syncData();
-            }, [savedRecipes, doneRecipes, recipeNotes, checkedItems, user, hasAccess]);
+                const timeoutId = setTimeout(syncData, 1000); // מחכה שניה של שקט לפני ששולח לענן
+                return () => clearTimeout(timeoutId);
+            }, [savedRecipes, doneRecipes, recipeNotes, checkedItems, user, hasAccess, dataLoaded]);
 
             useEffect(() => {
                 const handleScroll = () => { if (isMenuOpen) setIsMenuOpen(false); };
@@ -1202,7 +1217,7 @@
                             doneRecipes={doneRecipes} setDoneRecipes={setDoneRecipes}
                             setView={setView} setSelectedRecipe={setSelectedRecipe}
                             progress={progress}
-                            isSyncing={isSyncing}
+                            syncStatus={syncStatus}
                         />}
                         {view === 'recipe' && <RecipeView 
                             r={selectedRecipe} setView={setView} 
