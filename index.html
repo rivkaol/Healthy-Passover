@@ -46,8 +46,8 @@
             color: white;
         }
 
-        .btn-gold {
-            background: linear-gradient(135deg, #D4AF37 0%, #E5C565 100%);
+        .btn-pink {
+            background: linear-gradient(135deg, #d9778c 0%, #e6a5b3 100%);
             color: white;
         }
 
@@ -156,7 +156,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useCallback } = React;
+        const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
         // --- Custom Icons Components ---
         const LucideIcon = ({ name, className = "", size }) => {
@@ -507,7 +507,8 @@
             savedRecipes, setSavedRecipes,
             doneRecipes, setDoneRecipes,
             setView, setSelectedRecipe,
-            progress
+            progress,
+            isSyncing
         }) => {
             
             const statusFilters = [
@@ -530,9 +531,22 @@
                         <p className="text-lg md:text-xl text-[#B07D62] font-medium mb-8">ברוכה הבאה לפורטל האישי שלך. הכל מוכן כדי שתגיעי לחג ברוגע.</p>
                         
                         <div className="mb-10 max-w-md bg-[#10b981]/5 p-4 rounded-2xl border border-[#10b981]/10">
-                            <div className="flex justify-between items-center mb-2 text-sm font-bold text-[#1B4D3E]">
-                                <span>ההתקדמות האישית שלך לקראת החג</span>
-                                <span>הכנת כבר {doneRecipes.length} מתוך {recipesList.length} מתכונים!</span>
+                            <div className="flex flex-col gap-2 mb-2">
+                                <div className="flex justify-between items-center text-sm font-bold text-[#1B4D3E]">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <span>ההתקדמות האישית שלך לקראת החג</span>
+                                        {isSyncing ? (
+                                            <span className="flex items-center gap-1 text-xs text-gray-500 font-normal">
+                                                <LucideIcon name="refresh-cw" className="w-3 h-3 animate-spin" /> מסנכרן לענן...
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1 text-xs text-[#10b981] font-normal">
+                                                <LucideIcon name="check" className="w-3 h-3" /> מגובה בענן
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <span className="text-sm font-bold text-[#1B4D3E]">הכנת כבר {doneRecipes.length} מתוך {recipesList.length} מתכונים!</span>
                             </div>
                             <div className="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner">
                                 <div className="h-full bg-[#10b981] progress-bar-fill" style={{ width: `${progress}%` }}></div>
@@ -853,8 +867,6 @@
                             amount = 0; 
                         }
 
-                        // ביטול איחוד קטגוריות כללי - שימוש בשם המדויק של המצרך במתכון
-                        // אלא אם כן מדובר בביצים או תפוחים שכבר אוחדו
                         if (!aggregated[name]) {
                             aggregated[name] = { amount: 0, unit: unit, items: new Set() };
                         }
@@ -979,6 +991,9 @@
             const supportLink = "https://wa.me/504207702?text=היי+רבקה+יקירה,+יש+לי+שאלה+לגבי+הקורס";
 
             const previewMode = false; // הגדרת אבטחה מופעלת
+            
+            const isInitialLoad = useRef(true);
+            const [isSyncing, setIsSyncing] = useState(false);
 
             useEffect(() => {
                 let wakeLock = null;
@@ -992,6 +1007,11 @@
             }, [view]);
 
             useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            });
+
+            // טעינת נתונים מהענן בהתחברות
+            useEffect(() => {
                 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
                     return auth.onAuthStateChanged(async (u) => {
                         if (u) {
@@ -1000,6 +1020,23 @@
                             if (doc.exists && doc.data().hasAccess) {
                                 setHasAccess(true);
                                 setUser(u);
+                                
+                                try {
+                                    const activityDoc = await db.collection('user_activity').doc(cleanEmail).get();
+                                    if (activityDoc.exists) {
+                                        const data = activityDoc.data();
+                                        if (data.savedRecipes) setSavedRecipes(data.savedRecipes);
+                                        if (data.doneRecipes) setDoneRecipes(data.doneRecipes);
+                                        if (data.recipeNotes) setRecipeNotes(data.recipeNotes);
+                                        if (data.checkedItems) setCheckedItems(data.checkedItems);
+                                    }
+                                } catch (err) {
+                                    console.error("Error loading activity data:", err);
+                                } finally {
+                                    setTimeout(() => {
+                                        isInitialLoad.current = false;
+                                    }, 1000);
+                                }
                             } else { auth.signOut(); }
                         } else {
                             setUser(null);
@@ -1010,12 +1047,35 @@
                 });
             }, []);
 
+            // שמירה ל-LocalStorage וגם סנכרון בזמן אמת ל-Firestore
             useEffect(() => {
                 localStorage.setItem('saves', JSON.stringify(savedRecipes));
                 localStorage.setItem('done', JSON.stringify(doneRecipes));
                 localStorage.setItem('notes', JSON.stringify(recipeNotes));
                 localStorage.setItem('checkedItems', JSON.stringify(checkedItems));
-            }, [savedRecipes, doneRecipes, recipeNotes, checkedItems]);
+
+                if (isInitialLoad.current || !user || !hasAccess) return;
+
+                const syncData = async () => {
+                    setIsSyncing(true);
+                    try {
+                        const cleanEmail = user.email.toLowerCase();
+                        await db.collection('user_activity').doc(cleanEmail).set({
+                            savedRecipes,
+                            doneRecipes,
+                            recipeNotes,
+                            checkedItems,
+                            lastUpdated: new Date().toISOString()
+                        }, { merge: true });
+                    } catch (err) {
+                        console.error("Error syncing to Firestore:", err);
+                    } finally {
+                        setTimeout(() => setIsSyncing(false), 800);
+                    }
+                };
+
+                syncData();
+            }, [savedRecipes, doneRecipes, recipeNotes, checkedItems, user, hasAccess]);
 
             useEffect(() => {
                 const handleScroll = () => { if (isMenuOpen) setIsMenuOpen(false); };
@@ -1142,6 +1202,7 @@
                             doneRecipes={doneRecipes} setDoneRecipes={setDoneRecipes}
                             setView={setView} setSelectedRecipe={setSelectedRecipe}
                             progress={progress}
+                            isSyncing={isSyncing}
                         />}
                         {view === 'recipe' && <RecipeView 
                             r={selectedRecipe} setView={setView} 
