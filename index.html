@@ -190,7 +190,6 @@
         );
 
         // --- Data Definitions ---
-        // שימי לב: ingredients = מה שיוצג ללקוחה (בכוסות), calcIngredients = מה שישלח למנוע הקניות החכם (בגרמים).
         const recipesList = [
             { 
                 id: 1, 
@@ -622,7 +621,7 @@
                                                     className={`w-full py-3 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${
                                                         savedRecipes.includes(r.id)
                                                         ? 'bg-[#1B4D3E] text-white shadow-md'
-                                                        : 'bg-white text-[#d9778c] border-2 border-[#d9778c] hover:bg-[#d9778c] hover:text-white'
+                                                        : 'bg-white text-[#B07D62] border-2 border-[#B07D62] hover:bg-[#B07D62] hover:text-white'
                                                     }`}
                                                 >
                                                     {savedRecipes.includes(r.id) ? (
@@ -815,6 +814,8 @@
                             amount = 0; 
                         }
 
+                        // ביטול איחוד קטגוריות כללי - שימוש בשם המדויק של המצרך במתכון
+                        // אלא אם כן מדובר בביצים או תפוחים שכבר אוחדו
                         if (!aggregated[name]) {
                             aggregated[name] = { amount: 0, unit: unit, items: new Set() };
                         }
@@ -950,10 +951,6 @@
                 requestWakeLock();
                 return () => { if (wakeLock) wakeLock.release().then(() => wakeLock = null); };
             }, [view]);
-
-            useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            });
 
             useEffect(() => {
                 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
